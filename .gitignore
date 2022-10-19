@@ -1,0 +1,12 @@
+# VS code configuration
+.vscode
+*.code-workspace
+
+# Output files
+build
+
+# Back-up files
+sdkconfig.old
+
+TODO.md
+NOTES.md
