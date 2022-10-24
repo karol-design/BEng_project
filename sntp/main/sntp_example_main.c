@@ -50,15 +50,26 @@ void app_main(void)
 
     char strftime_buf[64];
 
+    ESP_LOGE(TAG, "\n\n\n");
+
     // Set timezone to London and print local time
     setenv("TZ","GMTGMT-1,M3.4.0/01,M10.4.0/02",1);
     tzset();
     localtime_r(&now, &timeinfo);
     strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
-    ESP_LOGW(TAG, "The current date/time in London is: %s", strftime_buf);
+    ESP_LOGI("SNTP Test", "The current date/time in London is: %s", strftime_buf);
+
+    struct timeval tv_now;
+
+    for (int i=0; i<5; i++) {
+        gettimeofday(&tv_now, NULL);
+        ESP_LOGI("SNTP Test", "The current time is: %llu:%llu", (int64_t)tv_now.tv_sec, (int64_t)tv_now.tv_usec);
+        vTaskDelay(500 / portTICK_PERIOD_MS);
+    }
+    
 
     const int deep_sleep_sec = 100;
-    ESP_LOGI(TAG, "Entering deep sleep for %d seconds", deep_sleep_sec);
+    ESP_LOGI(TAG, "\n\n\nEntering deep sleep for %d seconds", deep_sleep_sec);
     esp_deep_sleep(1000000LL * deep_sleep_sec);
 }
 
