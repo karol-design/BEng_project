@@ -28,7 +28,8 @@ static xQueueHandle gpio_evt_queue = NULL;
  * @brief Interrupt Service Routine Handler
  */
 static void IRAM_ATTR isr_handler(void *arg) {
-    xQueueSendFromISR(gpio_evt_queue, (uint32_t)(1), NULL);
+    uint32_t data = 1;
+    xQueueSendFromISR(gpio_evt_queue, &data, NULL);
 }
 
 /**
