@@ -3,5 +3,6 @@
 idf_component_register( SRCS "main.c"
 		INCLUDE_DIRS "."
 		PRIV_REQUIRES 
-			interrupts_drv)
+			interrupts_drv
+			common)
 
