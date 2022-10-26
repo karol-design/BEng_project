@@ -1,6 +1,6 @@
 #include <stdio.h>
-#include "esp_log.h"    // Logging macro
-#include "esp_check.h"  // Error checking macro
+#include "esp_log.h"
+#include "esp_check.h"
 #include "interrupts_drv.h"
 
 #define TAG "App"
