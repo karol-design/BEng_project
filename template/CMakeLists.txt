@@ -4,5 +4,11 @@
 # It includes the file "project.cmake" which implements the rest of the build system.
 
 cmake_minimum_required(VERSION 3.5)
+
+# See Main CMakeLists.txt for project includes
+# set(COMPONENTS "esptool_py" "main")
+
+set(EXTRA_COMPONENT_DIRS "components")
+
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(template)
