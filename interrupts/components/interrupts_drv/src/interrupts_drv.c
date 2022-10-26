@@ -56,7 +56,7 @@ static esp_err_t intr_gpio_config() {
     };
 
     ESP_ERROR_CHECK(gpio_config(&io_conf)); // Configure GPIO with the given settings
-    
+    ESP_LOGI(TAG, "GPIO Pin Configured");
     return ESP_OK;
 }
 
@@ -79,6 +79,7 @@ esp_err_t interrupt_init() {
 
     err = gpio_isr_handler_add(GPIO_INTERRUPT, isr_handler, NULL); // Hook isr handler for specific gpio pin
     ESP_ERROR_CHECK(err);
+    ESP_LOGI(TAG, "ISR Service installed, handler added, interrupt task created");
 
     return ESP_OK;
 }

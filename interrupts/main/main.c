@@ -13,6 +13,6 @@
 
 void app_main(void)
 {
-    ESP_LOGI(TAG, "Interrupt test...");
+    ESP_LOGI(TAG, "Interrupt test");
     ESP_ERROR_CHECK(interrupt_init());
 }
