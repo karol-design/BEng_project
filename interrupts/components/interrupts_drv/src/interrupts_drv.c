@@ -1,3 +1,9 @@
+/**
+ * @file    interrupts_drv.c
+ * @brief   Initialising interrupt and ISR, handling the ISR events via a seperate task
+ * @author  Karol Wojslaw (karol.wojslaw@student.manchester.ac.uk)
+ */
+
 #include <stdio.h>
 #include <string.h>
 
@@ -12,7 +18,7 @@
 
 #define TAG "Interrupt_drv"
 
-#define GPIO_INTERRUPT 4
+#define GPIO_INTERRUPT 4    // Pin to be used for the interrupt
 #define GPIO_INPUT_PIN_SEL (1ULL << GPIO_INTERRUPT)
 #define ESP_INTR_FLAG_DEFAULT 0
 
