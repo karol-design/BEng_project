@@ -1,8 +1,0 @@
-1) Run ESP-IDF in the command prompt
-2) Go to the directory where you want to create a project (using "cd .." and "cd [directory]")
-3) Run "idf.py create-project [project name]" to create a new project
-4) Run "idf.py set-target [target]", target might be esp32, esp32s2, esp32c3 or esp32s3
-5) Run "idf.py menuconfig" to configure the project (this will create "sdkconfig" file and "build" directory). Some configs to consider: Watchdog (on/off, timeout)
-6) Run "idf.py -p [port] build flash monitor" to build the project, flash it into the device and monitor it's output. Port is in the form COMx
-7) Add .vscode directory with c_cpp_properties and settings json files
-8) Run "idf.py create-component [component name]" to create a new component
