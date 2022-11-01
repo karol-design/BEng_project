@@ -26,17 +26,19 @@
 #define PULSES_PER_MEAS 10  // Number of interrupt pulses for one time measurement
 
 static xQueueHandle isr_queue = NULL;   // Queu for sending measured time
-volatile uint64_t isr_pulses = 0;       // Number of interrupt pulses (isr calls)
-volatile uint64_t isr_count = 0;        // Current counter value (used by the ISR)
 
 /**
  * @brief Interrupt Service Routine Handler
  */
 static void IRAM_ATTR isr_handler(void *arg) {
+    static uint64_t isr_count = 0;      // Current counter value (used by the ISR)
+    static uint64_t isr_pulses = 0;     // Number of interrupt pulses (isr calls)
+
     if((isr_pulses % PULSES_PER_MEAS) == 0) {               // Every PULSES_PER_MEAS
         isr_count = drv_timer_get_count_isr() - isr_count;  // Calc timer ticks since last reading
         xQueueSendFromISR(isr_queue, &isr_count, NULL);     // Send it to the queue
     }
+    
     isr_pulses++;   // Increment pulses count each time ISR is executed
 }
 
