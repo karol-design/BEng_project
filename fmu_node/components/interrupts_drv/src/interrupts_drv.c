@@ -31,11 +31,13 @@ static xQueueHandle isr_queue = NULL;   // Queu for sending measured time
  * @brief Interrupt Service Routine Handler
  */
 static void IRAM_ATTR isr_handler(void *arg) {
-    static uint64_t isr_count = 0;      // Current counter value (used by the ISR)
-    static uint64_t isr_pulses = 0;     // Number of interrupt pulses (isr calls)
+    static uint64_t isr_count_total = 0;    // Number of timer ticks since timer init
+    static uint64_t isr_pulses = 0;         // Number of interrupt pulses (isr calls)
+    static uint64_t isr_count = 0;          // Number of timer ticks since last reading
 
     if((isr_pulses % PULSES_PER_MEAS) == 0) {               // Every PULSES_PER_MEAS
-        isr_count = drv_timer_get_count_isr() - isr_count;  // Calc timer ticks since last reading
+        isr_count = drv_timer_get_count_isr() - isr_count_total;  // Calc timer ticks since last reading
+        isr_count_total = drv_timer_get_count_isr();
         xQueueSendFromISR(isr_queue, &isr_count, NULL);     // Send it to the queue
     }
     
@@ -49,7 +51,7 @@ static void interrupt_task(void *arg) {
     uint64_t count;
     while(true) {
         if (xQueueReceive(isr_queue, &count, portMAX_DELAY) == pdTRUE) { 
-            float frequency = ((40*1000000*10) / count);    // Timer tick f: 40 MHz, 10 pulses
+            float frequency = ((float)(40*1000000*10) / (float)count);    // Timer tick f: 40 MHz, 10 pulses
             ESP_LOGI(TAG, "Measured time: %llu, freq: %lf", count, frequency);  
         }
     }
@@ -96,6 +98,23 @@ static esp_err_t drv_interrupt_init() {
     return ESP_OK;
 }
 
+static void test_task(void *arg) {
+    static uint8_t test_pin_state = 0;             // Variable with LED state (default 0)
+    while (1) {
+        gpio_set_level(12, test_pin_state);   // Set the GPIO level according to the state
+        test_pin_state = !test_pin_state;     // Toggle the LED state
+        vTaskDelay(10 / portTICK_PERIOD_MS); // Non blocking delay
+    }
+}
+
+static esp_err_t drv_test_init() {
+    gpio_reset_pin(12);                         // Set the GPIO as a push/pull output
+    gpio_set_direction(12, GPIO_MODE_OUTPUT);   // Set the GPIO as an output
+    xTaskCreate(test_task, "test_task", 2048, NULL, 10, NULL); // Start interrupt task
+
+    return ESP_OK;
+}
+
 /**
  * @brief Initialise frequency measurement (Interrupt and timer)
  * @return Error code
@@ -103,6 +122,7 @@ static esp_err_t drv_interrupt_init() {
 esp_err_t f_meaurement_init() {
     ESP_ERROR_CHECK(drv_timer_init());
     ESP_ERROR_CHECK(drv_interrupt_init());
+    ESP_ERROR_CHECK(drv_test_init());
 
     return ESP_OK;
 }
