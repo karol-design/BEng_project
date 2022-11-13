@@ -44,6 +44,10 @@ esp_err_t drv_timer_init() {
 
     err = timer_init(TIMER_GROUP, TIMER_NUM, &config);  // Initialise the timer
     ESP_ERROR_CHECK(err);
+
+    static const uint64_t initial_count = 0;
+    err =  timer_set_counter_value(TIMER_GROUP, TIMER_NUM, initial_count);
+    ESP_ERROR_CHECK(err);
     
     ESP_LOGI(TAG, "Timer initialised and running");
     return ESP_OK;
