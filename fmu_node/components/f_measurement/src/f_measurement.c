@@ -42,16 +42,18 @@ static void IRAM_ATTR isr_handler(void *arg) {
 }
 
 /**
- * @brief Task handling timer-based measurements sent to the queue by the ISR
+ * @brief Read measured frequency if a new value is available
+ * @return Frequency or -1 if no new value is available
  */
-static void interrupt_task(void *arg) {
+float f_measurement_get_val() {
     uint64_t count;
-    while (true) {
-        if (xQueueReceive(isr_queue, &count, portMAX_DELAY) == pdTRUE) {
-            float frequency = ((float)(40 * 1000000 * 10) / (float)count);  // Timer tick f: 40 MHz, 10 pulses
-            ESP_LOGI(TAG, "time = %llu, freq = %lf Hz", count, frequency);
-        }
+    float frequency = -1.0;
+    if (xQueueReceive(isr_queue, &count, portMAX_DELAY) == pdTRUE) {
+        frequency = ((float)(40 * 1000000 * 10) / (float)count);  // Timer tick f: 40 MHz, 10 pulses
+        float time = (count * (float)2.5 / (float)1000000.0);
+        ESP_LOGI(TAG, "| Count: %llu | Time: %.1lf ms | Freq: %lf Hz ", count, time, frequency);
     }
+    return frequency;
 }
 
 /**
@@ -86,9 +88,8 @@ esp_err_t f_measurement_init(uint64_t gpio_interrupt) {
     err = intr_gpio_config(gpio_input_pin_select);  // Initialise gpio for the interrupt
     ESP_ERROR_CHECK(err);
 
-    // Create a queue to handle timer measurements from isr
+    // Create a queue to handle timer measurements from the isr
     isr_queue = xQueueCreate(10, sizeof(uint64_t));
-    xTaskCreate(interrupt_task, "interrupt_task", 2048, NULL, 10, NULL);  // Start interrupt task
 
     err = gpio_install_isr_service(ESP_INTR_FLAG_DEFAULT);  // Install gpio isr service
     ESP_ERROR_CHECK(err);
@@ -124,6 +125,7 @@ esp_err_t f_measurement_test(const uint64_t gpio_zco) {
     gpio_reset_pin(gpio_zco);                                                          // Set the GPIO as a push/pull output
     gpio_set_direction(gpio_zco, GPIO_MODE_OUTPUT);                                    // Set the GPIO as an output
     xTaskCreate(ZCO_sim_task, "ZCO_sim_task", 2048, (void *const)gpio_zco, 10, NULL);  // Start interrupt task
+    ESP_LOGI(TAG, "Frequency measurement test initialised");
 
     return ESP_OK;
 }
