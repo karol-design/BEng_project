@@ -21,6 +21,9 @@ void app_main(void) {
     ESP_ERROR_CHECK(f_measurement_test(TEST_PIN));  // Initialise ZCO simulation & freq. measurement test
 
     while (true) {
-        float freq = f_measurement_get_val();  // Read measured frequency if a new value is available
+        float frequency = f_measurement_get_val();  // Read frequency
+        if (frequency != -1.0) {                    // Check if a new value was available
+            ESP_LOGI(TAG, " Freq: %lf Hz ", frequency);
+        }
     }
 }
