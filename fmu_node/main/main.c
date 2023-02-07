@@ -7,11 +7,12 @@
 #include <stdio.h>
 #include "esp_log.h"
 #include "esp_check.h"
-#include "interrupts_drv.h"
+#include "f_measurement.h"
 
 #define TAG "App"
 
 void app_main(void) {
     ESP_LOGI(TAG, "Frequency measurement test");
-    ESP_ERROR_CHECK(f_meaurement_init());
+    ESP_ERROR_CHECK(f_measurement_init());
+    ESP_ERROR_CHECK(f_measurement_test());
 }
