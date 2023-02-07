@@ -15,9 +15,9 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
 #include "freertos/task.h"
-#include "timers_drv.h"
+#include "timer_drv.h"
 
-#define TAG "Frequency measurement"
+#define TAG "f_measurement"
 
 #define ESP_INTR_FLAG_DEFAULT 0
 #define PULSES_PER_MEAS 10  // Number of interrupt pulses for one time measurement
@@ -49,7 +49,7 @@ static void interrupt_task(void *arg) {
     while (true) {
         if (xQueueReceive(isr_queue, &count, portMAX_DELAY) == pdTRUE) {
             float frequency = ((float)(40 * 1000000 * 10) / (float)count);  // Timer tick f: 40 MHz, 10 pulses
-            ESP_LOGI(TAG, "Measured time: %llu, freq: %lf", count, frequency);
+            ESP_LOGI(TAG, "time = %llu, freq = %lf Hz", count, frequency);
         }
     }
 }
@@ -100,19 +100,30 @@ esp_err_t f_measurement_init(uint64_t gpio_interrupt) {
     return ESP_OK;
 }
 
-static void test_task(void *arg) {
-    static uint8_t test_pin_state = 0;  // Variable with LED state (default 0)
-    while(true) {
-        gpio_set_level(12, test_pin_state);   // Set the GPIO level according to the state
-        test_pin_state = !test_pin_state;     // Toggle the LED state
-        vTaskDelay(10 / portTICK_PERIOD_MS);  // Non blocking delay
+/**
+ * @brief Task responsible for simulating the zero-crossing output
+ * @param *param pointer to the uint64_t var with the pin to be used for the test
+ * @return Error code
+ */
+static void ZCO_sim_task(void *param) {
+    uint64_t gpio_zco = (uint64_t)param;
+    static uint8_t test_pin_state = 0;  // Variable with pin state (default 0)
+    while (true) {
+        gpio_set_level(gpio_zco, test_pin_state);  // Set the GPIO level according to the state
+        test_pin_state = !test_pin_state;          // Toggle the LED state
+        vTaskDelay(10 / portTICK_PERIOD_MS);       // Non blocking delay
     }
 }
 
-esp_err_t f_measurement_test() {
-    gpio_reset_pin(12);                                         // Set the GPIO as a push/pull output
-    gpio_set_direction(12, GPIO_MODE_OUTPUT);                   // Set the GPIO as an output
-    xTaskCreate(test_task, "test_task", 2048, NULL, 10, NULL);  // Start interrupt task
+/**
+ * @brief Test frequency measurement capabilities by simulating the zero-crossing output (ZCO)
+ * @param gpio_zco pin to be used for the test
+ * @return Error code
+ */
+esp_err_t f_measurement_test(const uint64_t gpio_zco) {
+    gpio_reset_pin(gpio_zco);                                                          // Set the GPIO as a push/pull output
+    gpio_set_direction(gpio_zco, GPIO_MODE_OUTPUT);                                    // Set the GPIO as an output
+    xTaskCreate(ZCO_sim_task, "ZCO_sim_task", 2048, (void *const)gpio_zco, 10, NULL);  // Start interrupt task
 
     return ESP_OK;
 }

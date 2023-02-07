@@ -12,9 +12,10 @@
 #define TAG "App"
 
 #define ZCO_PIN 4
+#define TEST_PIN 12
 
 void app_main(void) {
     ESP_LOGI(TAG, "Frequency measurement test");
     ESP_ERROR_CHECK(f_measurement_init(ZCO_PIN));
-    ESP_ERROR_CHECK(f_measurement_test());
+    ESP_ERROR_CHECK(f_measurement_test(TEST_PIN));
 }

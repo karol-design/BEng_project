@@ -1,6 +1,6 @@
 /**
- * @file    timers_drv.h
- * @brief   Initialising timers
+ * @file    timer_drv.h
+ * @brief   Initialise timer, reset and get current count value
  * @author  Karol Wojslaw (karol.wojslaw@student.manchester.ac.uk)
  */
 

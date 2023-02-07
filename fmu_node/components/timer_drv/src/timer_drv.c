@@ -1,10 +1,10 @@
 /**
- * @file    timers_drv.c
+ * @file    timer_drv.c
  * @brief   Initialise timer, reset and get current count value
  * @author  Karol Wojslaw (karol.wojslaw@student.manchester.ac.uk)
  */
 
-#include "timers_drv.h"
+#include "timer_drv.h"
 
 #include <stdio.h>
 
@@ -12,7 +12,7 @@
 #include "esp_check.h"
 #include "esp_log.h"
 
-#define TAG "Timer driver"
+#define TAG "timer_drv"
 
 #define TIMER_DIVIDER (2)  //  Hardware timer clock divider (80/2 = 40 MHz)
 #define TIMER_GROUP TIMER_GROUP_0
