@@ -8,5 +8,5 @@
 
 #include "esp_err.h"
 
-esp_err_t f_measurement_init();
+esp_err_t f_measurement_init(uint64_t gpio_interrupt);
 esp_err_t f_measurement_test();
