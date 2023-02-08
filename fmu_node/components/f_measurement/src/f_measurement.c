@@ -6,6 +6,8 @@
 
 #include "f_measurement.h"
 
+#include "timer_drv.h"
+
 #define TAG "f_measurement"
 
 #define ESP_INTR_FLAG_DEFAULT 0
