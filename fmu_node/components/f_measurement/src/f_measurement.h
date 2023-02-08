@@ -6,7 +6,17 @@
 
 #pragma once
 
+#include <stdio.h>
+#include <string.h>
+
+#include "driver/gpio.h"
+#include "esp_check.h"
 #include "esp_err.h"
+#include "esp_log.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/queue.h"
+#include "freertos/task.h"
+#include "timer_drv.h"
 
 esp_err_t f_measurement_init(uint64_t gpio_interrupt);
 esp_err_t f_measurement_test(const uint64_t gpio_zco);

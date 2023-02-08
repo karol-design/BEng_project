@@ -6,17 +6,6 @@
 
 #include "f_measurement.h"
 
-#include <stdio.h>
-#include <string.h>
-
-#include "driver/gpio.h"
-#include "esp_check.h"
-#include "esp_log.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/queue.h"
-#include "freertos/task.h"
-#include "timer_drv.h"
-
 #define TAG "f_measurement"
 
 #define ESP_INTR_FLAG_DEFAULT 0
