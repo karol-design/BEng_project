@@ -8,9 +8,6 @@
 
 #define TAG "wifi_drv"
 
-#define DEFAULT_SSID "iPhone (Karol)"
-#define DEFAULT_PWD "karol1234"
-
 /**
  * @brief WIFI and IP events handler
  */
@@ -29,7 +26,7 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
  * @brief Initialize, configure and start Wi-Fi in a station mode
  * @return Error code
  */
-esp_err_t wifi_drv_init(char* ssid, char* pass) {
+esp_err_t wifi_drv_init() {
     ESP_ERROR_CHECK(esp_netif_init());                 // Create an LwIP core task and initialize LwIP-related work
     ESP_ERROR_CHECK(esp_event_loop_create_default());  // Create an event loop to handle events from the WiFi task
 
@@ -48,14 +45,15 @@ esp_err_t wifi_drv_init(char* ssid, char* pass) {
     // Define WiFi Station configuration
     wifi_config_t wifi_config = {
         .sta = {
-            .ssid = ssid,
-            .password = pass,
+            .ssid = WIFI_SSID,
+            .password = WIFI_PASS,
             .scan_method = WIFI_FAST_SCAN,             // Use fast scan, i.e. end after find SSID match AP
             .sort_method = WIFI_CONNECT_AP_BY_SIGNAL,  // Sort AP by RSSI
-            .threshold.rssi = -127,                    // Weakest RSSI to be considered
+            .threshold.rssi = (int8_t)(-127),          // Weakest RSSI to be considered
             .threshold.authmode = WIFI_AUTH_OPEN,      // Weakest authentication mode (no security)
         },
     };
+
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));                // Set mode to station
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));  // Set configuration
     ESP_LOGI(TAG, "WiFi configured sucessfully");

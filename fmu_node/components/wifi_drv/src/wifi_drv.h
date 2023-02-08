@@ -6,6 +6,9 @@
 
 #pragma once
 
+#define WIFI_SSID "iPhone (Karol)"
+#define WIFI_PASS "karol1234"
+
 #include "esp_err.h"
 #include "esp_event.h"
 #include "esp_log.h"

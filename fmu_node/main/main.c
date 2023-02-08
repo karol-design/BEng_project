@@ -19,9 +19,6 @@
 #define ZCO_PIN 4
 #define TEST_PIN 12
 
-#define SSID "iPhone (Karol)"
-#define PASS "karol1234"
-
 void app_main(void) {
     esp_err_t err = ESP_OK;
 
@@ -32,9 +29,9 @@ void app_main(void) {
     }
     ESP_ERROR_CHECK(err);
 
-    ESP_ERROR_CHECK(wifi_drv_init(SSID, PASS));  // Initialise WiFi
+    ESP_ERROR_CHECK(wifi_drv_init());  // Initialise WiFi
 
-    vTaskDelay(5000 / portTICK_RATE_MS);
+    vTaskDelay(10000 / portTICK_RATE_MS);
 
     ESP_LOGI(TAG, "Frequency measurement test");
     ESP_ERROR_CHECK(f_measurement_init(ZCO_PIN));   // Initialise frequency measurement
