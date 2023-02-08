@@ -9,6 +9,7 @@
 #include "esp_check.h"
 #include "esp_log.h"
 #include "f_measurement.h"
+#include "wifi.h"
 
 #define TAG "app"
 
