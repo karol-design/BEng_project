@@ -16,4 +16,4 @@
 #include "freertos/FreeRTOS.h"
 
 esp_err_t systime_synchronise();
-struct timeval systime_get();
+struct timeval systime_log();

@@ -39,7 +39,7 @@ esp_err_t systime_synchronise() {
  * @brief Get current system time
  * @return Time value structure
  */
-struct timeval systime_get() {
+struct timeval systime_log() {
     time_t now;          // Number of seconds (int) since 00:00, Jan 1 1970 UTC (i.e. POSIX time)
     struct tm timeinfo;  // Time structure
     time(&now);          // Copy the current system time to the variable now

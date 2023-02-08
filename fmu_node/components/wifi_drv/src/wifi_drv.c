@@ -8,7 +8,7 @@
 
 #define TAG "wifi_drv"
 
-static uint8_t ip_assigned = false; // IP assigned by the AP flag
+static uint8_t ip_assigned = false;  // IP assigned by the AP flag
 
 /**
  * @brief WIFI and IP events handler
