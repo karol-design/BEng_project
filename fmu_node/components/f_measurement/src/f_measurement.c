@@ -100,7 +100,7 @@ esp_err_t f_measurement_init(uint64_t gpio_interrupt) {
 static void ZCO_sim_task(void *param) {
     uint64_t gpio_zco = (uint64_t)param;
     static uint8_t test_pin_state = 0;  // Variable with pin state (default 0)
-    while (true) {
+    for(int i=0; i<200; i++) {
         gpio_set_level(gpio_zco, test_pin_state);  // Set the GPIO level according to the state
         test_pin_state = !test_pin_state;          // Toggle the LED state
         vTaskDelay(10 / portTICK_PERIOD_MS);       // Non blocking delay
