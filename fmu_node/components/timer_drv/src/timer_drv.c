@@ -6,12 +6,6 @@
 
 #include "timer_drv.h"
 
-#include <stdio.h>
-
-#include "driver/timer.h"
-#include "esp_check.h"
-#include "esp_log.h"
-
 #define TAG "timer_drv"
 
 #define TIMER_DIVIDER (2)  //  Hardware timer clock divider (80/2 = 40 MHz)
