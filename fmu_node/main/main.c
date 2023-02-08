@@ -9,6 +9,7 @@
 #include "esp_check.h"
 #include "esp_log.h"
 #include "f_measurement.h"
+#include "freertos/FreeRTOS.h"
 #include "nvs_flash.h"
 #include "systime.h"
 #include "wifi_drv.h"
@@ -18,6 +19,8 @@
 #define TEST_PIN 12
 
 void app_main(void) {
+    systime_get();
+
     esp_err_t err = ESP_OK;
 
     err = nvs_flash_init();  // Initialize NVS
@@ -30,6 +33,9 @@ void app_main(void) {
     ESP_ERROR_CHECK(wifi_drv_init());          // Initialise WiFi
     while (wifi_drv_ip_assigned() == false) {  // Test whether IP addr has been assigned
     }
+
+    systime_synchronise();
+    systime_get();
 
     ESP_LOGI(TAG, "Frequency measurement test");
     ESP_ERROR_CHECK(f_measurement_init(ZCO_PIN));   // Initialise frequency measurement
