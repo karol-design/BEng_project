@@ -43,7 +43,7 @@ void app_main(void) {
         float freq = f_measurement_get_val();  // Read frequency
         if (freq != -1.0) {                    // Check if a new value was available
             gettimeofday(&time, NULL);              // Copy current sys time to sys_time struct
-            ESP_LOGI(TAG, "Freq: %lf Hz | Time: %llu s and %llu us", freq, (int64_t)time.tv_sec, (int64_t)time.tv_usec);
+            ESP_LOGI(TAG, "Freq: %lf Hz | Time: %llu s %llu us", freq, (int64_t)time.tv_sec, (int64_t)time.tv_usec);
         }
     }
 }
