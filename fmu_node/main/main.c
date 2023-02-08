@@ -20,7 +20,6 @@
 
 void app_main(void) {
     esp_err_t err = ESP_OK;
-
     err = nvs_flash_init();  // Initialize NVS
     if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
         ESP_ERROR_CHECK(nvs_flash_erase());  // Erase NVS flash memory
@@ -42,7 +41,7 @@ void app_main(void) {
     while (true) {
         float freq = f_measurement_get_val();  // Read frequency
         if (freq != -1.0) {                    // Check if a new value was available
-            gettimeofday(&time, NULL);              // Copy current sys time to sys_time struct
+            gettimeofday(&time, NULL);         // Copy current sys time to sys_time struct
             ESP_LOGI(TAG, "Freq: %lf Hz | Time: %llu s %llu us", freq, (int64_t)time.tv_sec, (int64_t)time.tv_usec);
         }
     }
