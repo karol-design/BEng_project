@@ -17,3 +17,4 @@
 #include "freertos/event_groups.h"
 
 esp_err_t wifi_drv_init();
+uint8_t wifi_drv_ip_assigned();

@@ -4,8 +4,6 @@
  * @author  Karol Wojslaw (karol.wojslaw@student.manchester.ac.uk)
  */
 
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
 #include <stdio.h>
 
 #include "esp_check.h"
@@ -15,7 +13,6 @@
 #include "wifi_drv.h"
 
 #define TAG "app"
-
 #define ZCO_PIN 4
 #define TEST_PIN 12
 
@@ -29,9 +26,9 @@ void app_main(void) {
     }
     ESP_ERROR_CHECK(err);
 
-    ESP_ERROR_CHECK(wifi_drv_init());  // Initialise WiFi
-
-    vTaskDelay(10000 / portTICK_RATE_MS);
+    ESP_ERROR_CHECK(wifi_drv_init());          // Initialise WiFi
+    while (wifi_drv_ip_assigned() == false) {  // Test whether IP addr has been assigned
+    }
 
     ESP_LOGI(TAG, "Frequency measurement test");
     ESP_ERROR_CHECK(f_measurement_init(ZCO_PIN));   // Initialise frequency measurement
