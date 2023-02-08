@@ -10,6 +10,7 @@
 #include "esp_log.h"
 #include "f_measurement.h"
 #include "nvs_flash.h"
+#include "systime.h"
 #include "wifi_drv.h"
 
 #define TAG "app"
