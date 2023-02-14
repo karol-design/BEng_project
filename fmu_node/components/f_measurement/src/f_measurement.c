@@ -11,7 +11,7 @@
 #define TAG "f_measurement"
 
 #define ESP_INTR_FLAG_DEFAULT 0
-#define PULSES_PER_MEAS 10  // Number of interrupt pulses for one time measurement
+#define PULSES_PER_MEAS 1000  // Number of interrupt pulses for one time measurement
 
 static xQueueHandle isr_queue = NULL;  // Queu for sending measured time
 
@@ -40,7 +40,7 @@ float f_measurement_get_val() {
     uint64_t count;
     float frequency = -1.0;
     if (xQueueReceive(isr_queue, &count, portMAX_DELAY) == pdTRUE) {
-        frequency = ((float)(40 * 1000000 * PULSES_PER_MEAS) / (float)count);  // Timer f: 40 MHz, 10 pulses
+        frequency = (float)(((uint64_t)40 * (uint64_t)1000000 * (uint64_t)PULSES_PER_MEAS) / count);  // Timer f: 40 MHz, 10 pulses
         // float time = (count * (float)2.5 / (float)1000000.0);
         // ESP_LOGI(TAG, "| Count: %llu | Time: %.1lf ms | Freq: %lf Hz ", count, time, frequency);
     }
