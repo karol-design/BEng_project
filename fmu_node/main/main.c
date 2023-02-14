@@ -10,14 +10,16 @@
 #include "esp_check.h"
 #include "f_measurement.h"
 #include "freertos/FreeRTOS.h"
+#include "mqtt_drv.h"
 #include "nvs_flash.h"
 #include "systime.h"
 #include "wifi_drv.h"
-#include "mqtt_drv.h"
 
 #define TAG "app"
 #define ZCO_PIN 4
 #define TEST_PIN 12
+
+void send_update();
 
 void app_main(void) {
     ESP_LOGI(TAG, "[APP] Free memory: %d bytes", esp_get_free_heap_size());
@@ -37,19 +39,31 @@ void app_main(void) {
     }
 
     ESP_ERROR_CHECK(systime_synchronise());  // Synchronise system time using SNTP
-    // struct timeval time;                     // Create a structure to hold current time data
 
-    // ESP_LOGI(TAG, "Frequency measurement test");
-    // ESP_ERROR_CHECK(f_measurement_init(ZCO_PIN));   // Initialise frequency measurement
-    // ESP_ERROR_CHECK(f_measurement_test(TEST_PIN));  // Initialise ZCO simulation & freq. measurement test
-
-    // while (true) {
-    //     float freq = f_measurement_get_val();  // Read frequency
-    //     if (freq != -1.0) {                    // Check if a new value was available
-    //         gettimeofday(&time, NULL);         // Copy current sys time to sys_time struct
-    //         ESP_LOGI(TAG, "Freq: %lf Hz | Time: %llu s %llu us", freq, (int64_t)time.tv_sec, (int64_t)time.tv_usec);
-    //     }
-    // }
+    ESP_LOGI(TAG, "Frequency measurement test");
+    ESP_ERROR_CHECK(f_measurement_init(ZCO_PIN));   // Initialise frequency measurement
+    ESP_ERROR_CHECK(f_measurement_test(TEST_PIN));  // Initialise ZCO simulation & freq. measurement test
 
     ESP_ERROR_CHECK(mqtt_drv_init());
+    while (mqtt_drv_connected() != true) {  // Wait for the device to connect to the MQTT broker
+    }
+
+    while (1) {
+        send_update();
+        vTaskDelay(2000 / portTICK_PERIOD_MS);
+    }
+}
+
+void send_update() {
+    struct timeval time;  // Create a structure to hold current time data
+
+    while (true) {
+        float freq = f_measurement_get_val();  // Read frequency
+        if (freq != -1.0) {                    // Check if a new value was available
+            gettimeofday(&time, NULL);         // Copy current sys time to sys_time struct
+            ESP_LOGI(TAG, "Freq: %lf Hz | Time: %llu s %llu us", freq, (int64_t)time.tv_sec, (int64_t)time.tv_usec);
+            uint64_t time_ms = (time.tv_sec * 1000 + (time.tv_usec / 1000));  // Calculate time in ms
+            mqtt_drv_send(freq, time_ms, "System OK");                        // Send frequency, time and status
+        }
+    }
 }

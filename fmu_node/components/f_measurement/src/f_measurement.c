@@ -40,7 +40,7 @@ float f_measurement_get_val() {
     uint64_t count;
     float frequency = -1.0;
     if (xQueueReceive(isr_queue, &count, portMAX_DELAY) == pdTRUE) {
-        frequency = ((float)(40 * 1000000 * 10) / (float)count);  // Timer tick f: 40 MHz, 10 pulses
+        frequency = ((float)(40 * 1000000 * PULSES_PER_MEAS) / (float)count);  // Timer f: 40 MHz, 10 pulses
         // float time = (count * (float)2.5 / (float)1000000.0);
         // ESP_LOGI(TAG, "| Count: %llu | Time: %.1lf ms | Freq: %lf Hz ", count, time, frequency);
     }
