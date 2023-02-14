@@ -5,6 +5,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/time.h>
 
 #include "esp_check.h"
@@ -55,15 +56,20 @@ void app_main(void) {
 }
 
 void send_update() {
-    struct timeval time;  // Create a structure to hold current time data
+    struct timeval time;                                              // Create a structure to hold current time data
+    gettimeofday(&time, NULL);         // Copy current sys time to sys_time struct
+    uint64_t time_ms = (time.tv_sec * 1000 + (time.tv_usec / 1000));  // Calculate time in ms
+    srand(time_ms);                                                   // Initialization, should only be called once.
+    float r = (float)((rand() % 1000) / (float)1000.0);               // Returns a pseudo-random integer between 0 and RAND_MAX.
+    float freq = 49.500 + r;
+    mqtt_drv_send(freq, time_ms, "System OK");                        // Send frequency, time and status
 
-    while (true) {
-        float freq = f_measurement_get_val();  // Read frequency
-        if (freq != -1.0) {                    // Check if a new value was available
-            gettimeofday(&time, NULL);         // Copy current sys time to sys_time struct
-            ESP_LOGI(TAG, "Freq: %lf Hz | Time: %llu s %llu us", freq, (int64_t)time.tv_sec, (int64_t)time.tv_usec);
-            uint64_t time_ms = (time.tv_sec * 1000 + (time.tv_usec / 1000));  // Calculate time in ms
-            mqtt_drv_send(freq, time_ms, "System OK");                        // Send frequency, time and status
-        }
-    }
+    // while (true) {
+    //     float freq = f_measurement_get_val();  // Read frequency
+    //     if (freq != -1.0) {                    // Check if a new value was available
+    //         gettimeofday(&time, NULL);         // Copy current sys time to sys_time struct
+    //         ESP_LOGI(TAG, "Freq: %lf Hz | Time: %llu s %llu us", freq, (int64_t)time.tv_sec, (int64_t)time.tv_usec);
+    //         //...
+    //     }
+    // }
 }
