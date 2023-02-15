@@ -7,8 +7,6 @@
 #include "systime.h"
 
 #define TAG "systime"
-#define SNTP_SYNCH_RETRY 10    // Max number of SNTP synchronisation attempts
-#define SNTP_SYNCH_DELAY 1000  // Delay in ms between first and successive attempts to synch. time
 
 /**
  * @brief Initialise SNTP
