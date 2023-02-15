@@ -8,10 +8,6 @@
 
 #define TAG "timer_drv"
 
-#define TIMER_DIVIDER (2)  //  Hardware timer clock divider (80/2 = 40 MHz)
-#define TIMER_GROUP TIMER_GROUP_0
-#define TIMER_NUM TIMER_0
-
 /**
  * @brief Timer get count (to be used in ISRs)
  * @return Count
