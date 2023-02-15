@@ -9,9 +9,7 @@
 #include <stdio.h>
 
 #include "driver/timer.h"
-#include "esp_check.h"
-#include "esp_err.h"
-#include "esp_log.h"
+#include "config_macros.h"
 
 esp_err_t drv_timer_init();
 uint64_t drv_timer_get_count_isr();

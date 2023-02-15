@@ -7,12 +7,12 @@
 #pragma once
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <sys/time.h>
 
+#include "config_macros.h"
 #include "driver/gpio.h"
-#include "esp_check.h"
-#include "esp_err.h"
-#include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
 #include "freertos/task.h"

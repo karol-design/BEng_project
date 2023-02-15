@@ -11,9 +11,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "esp_err.h"
+#include "config_macros.h"
 #include "esp_event.h"
-#include "esp_log.h"
 #include "esp_system.h"
 #include "mqtt_client.h"
 
