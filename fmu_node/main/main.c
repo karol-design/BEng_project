@@ -20,56 +20,42 @@
 #define ZCO_PIN 4
 #define TEST_PIN 12
 
-void send_update();
-
 void app_main(void) {
-    ESP_LOGI(TAG, "[APP] Free memory: %d bytes", esp_get_free_heap_size());
-    ESP_LOGI(TAG, "[APP] IDF version: %s", esp_get_idf_version());
     esp_log_level_set("*", ESP_LOG_INFO);
-
     esp_err_t err = ESP_OK;
+    struct timeval time;
+
     err = nvs_flash_init();  // Initialize NVS
     if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
         ESP_ERROR_CHECK(nvs_flash_erase());  // Erase NVS flash memory
         err = nvs_flash_init();              // And try initialising it again
     }
-    ESP_ERROR_CHECK(err);
 
     ESP_ERROR_CHECK(wifi_drv_init());          // Initialise WiFi
-    while (wifi_drv_ip_assigned() == false) {  // Test whether IP addr has been assigned
+    while (wifi_drv_ip_assigned() == false) {  // Wait for the device to get an IP addr
     }
 
     ESP_ERROR_CHECK(systime_synchronise());  // Synchronise system time using SNTP
+    systime_log();                           // Print synchronised time
 
-    ESP_LOGI(TAG, "Frequency measurement test");
-    ESP_ERROR_CHECK(f_measurement_init(ZCO_PIN));   // Initialise frequency measurement
-    ESP_ERROR_CHECK(f_measurement_test(TEST_PIN));  // Initialise ZCO simulation & freq. measurement test
-
-    ESP_ERROR_CHECK(mqtt_drv_init());
+    ESP_ERROR_CHECK(mqtt_drv_init());       // Initialise MQTT
     while (mqtt_drv_connected() != true) {  // Wait for the device to connect to the MQTT broker
     }
 
-    while (1) {
-        send_update();
-        vTaskDelay(2000 / portTICK_PERIOD_MS);
+    ESP_LOGW(TAG, "-------- Start frequency measurement test --------\n");
+    ESP_ERROR_CHECK(f_measurement_init(ZCO_PIN));   // Initialise frequency measurement
+    ESP_ERROR_CHECK(f_measurement_test(TEST_PIN));  // Initialise ZCO simulation
+
+    /**** Infinite measure - upload loop ****/
+    while (true) {
+        float freq = f_measurement_get_val();                                                       // Read frequency
+        if (freq != -1.0) {                                                                         // Check if a new value was available
+            gettimeofday(&time, NULL);                                                              // Copy current sys time to sys_time struct
+            uint64_t time_ms = (((uint64_t)time.tv_sec * 1000) + ((uint64_t)time.tv_usec / 1000));  // Calculate time in ms
+            ESP_LOGI(TAG, "| Freq: %.3lf Hz | Time: %llu s %llu us | UNIX Time: %llu", freq, (int64_t)time.tv_sec, (int64_t)time.tv_usec, time_ms);
+            char status[50];  // String to hold device status
+            sprintf(status, "Chip: %s | Free mem: %d bytes", CONFIG_IDF_TARGET, esp_get_free_heap_size());
+            mqtt_drv_send(freq, time_ms, status);  // Send frequency, time and status
+        }
     }
-}
-
-void send_update() {
-    struct timeval time;                                              // Create a structure to hold current time data
-    gettimeofday(&time, NULL);         // Copy current sys time to sys_time struct
-    uint64_t time_ms = (time.tv_sec * 1000 + (time.tv_usec / 1000));  // Calculate time in ms
-    srand(time_ms);                                                   // Initialization, should only be called once.
-    float r = (float)((rand() % 1000) / (float)1000.0);               // Returns a pseudo-random integer between 0 and RAND_MAX.
-    float freq = 49.500 + r;
-    mqtt_drv_send(freq, time_ms, "System OK");                        // Send frequency, time and status
-
-    // while (true) {
-    //     float freq = f_measurement_get_val();  // Read frequency
-    //     if (freq != -1.0) {                    // Check if a new value was available
-    //         gettimeofday(&time, NULL);         // Copy current sys time to sys_time struct
-    //         ESP_LOGI(TAG, "Freq: %lf Hz | Time: %llu s %llu us", freq, (int64_t)time.tv_sec, (int64_t)time.tv_usec);
-    //         //...
-    //     }
-    // }
 }
