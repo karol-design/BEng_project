@@ -8,14 +8,6 @@
 
 #define TAG "mqtt_drv"
 
-#define MQTT_URI "mqtt://mqtt3.thingspeak.com"    // ThingSpeak MQTT URI
-#define MQTT_PORT 1883                            // TCP Port
-#define MQTT_USERNAME "MxEJJyY4MwYHCS0TNzksJx4"   // Device Username
-#define MQTT_PASSWORD "KBbyTJRU5/dlf+Fd+40Yu7pJ"  // Device Password
-#define MQTT_ID "MxEJJyY4MwYHCS0TNzksJx4"         // Device ID
-
-#define MQTT_FIELD_FREQ "channels/2033438/publish"  // Frequency/time channel topic
-
 esp_mqtt_client_handle_t client;          // MQTT Client handle
 static bool mqtt_connected_flag = false;  // Flag to indicate sucessfull connection to the MQTT broker
 
@@ -62,6 +54,12 @@ bool mqtt_drv_connected() {
     return mqtt_connected_flag;
 }
 
+/**
+ * @brief Send MQTT message with frequency, time and status update
+ * @param frequency Measured frequency [Hz]
+ * @param time_ms UNIX timestamp of the measurement [ms]
+ * @param str_status Status of the device
+ */
 void mqtt_drv_send(float frequency, uint64_t time_ms, const char *str_status) {
     char message[100] = "field1=";
 
@@ -78,7 +76,7 @@ void mqtt_drv_send(float frequency, uint64_t time_ms, const char *str_status) {
     strcat(message, str_status);
 
     int msg_id = esp_mqtt_client_publish(client, MQTT_FIELD_FREQ, message, 0, 0, 0);
-    ESP_LOGI(TAG, "Frequency, timestamp and status published successfully, msg_id = %d", msg_id);
+    ESP_LOGI(TAG, "Frequency, timestamp and status published successfully, msg_id = %d \n", msg_id);
 }
 
 /**
