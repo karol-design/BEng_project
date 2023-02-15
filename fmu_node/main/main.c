@@ -52,7 +52,7 @@ void app_main(void) {
         if (freq != -1.0) {                    // Check if a new value was available
             gettimeofday(&time, NULL);         // Copy current sys time to sys_time struct and calculate time in ms
             uint64_t time_ms = (((uint64_t)time.tv_sec * 1000) + ((uint64_t)time.tv_usec / 1000));
-            ESP_LOGI(TAG, "| Freq: %.3lf Hz | Time: %llu s %llu us | UNIX Time: %llu", freq, (int64_t)time.tv_sec, (int64_t)time.tv_usec, time_ms);
+            ESP_LOGI(TAG, "| Freq: %.3lf Hz | UNIX Time: %llu ms", freq, time_ms);
             char status[50];  // String to hold device status
             sprintf(status, "Chip: %s | Free mem: %d bytes", CONFIG_IDF_TARGET, esp_get_free_heap_size());
             mqtt_drv_send(freq, time_ms, status);  // Send frequency, time and status
