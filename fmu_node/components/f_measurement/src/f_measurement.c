@@ -10,9 +10,6 @@
 
 #define TAG "f_measurement"
 
-#define ESP_INTR_FLAG_DEFAULT 0
-#define PULSES_PER_MEAS 1000  // Number of interrupt pulses for one time measurement
-
 static xQueueHandle isr_queue = NULL;  // Queu for sending measured time
 
 /**
@@ -22,6 +19,10 @@ static void IRAM_ATTR isr_handler(void *arg) {
     static uint64_t isr_count_total = 0;  // Number of timer ticks since timer init
     static uint64_t isr_pulses = 0;       // Number of interrupt pulses (isr calls)
     static uint64_t isr_count = 0;        // Number of timer ticks since last reading
+
+    if (isr_pulses == 1) {
+        isr_count_total = drv_timer_get_count_isr();  // Reset the isr_count_total with the first pulse
+    }
 
     if ((isr_pulses % PULSES_PER_MEAS) == 0) {                    // Every PULSES_PER_MEAS
         isr_count = drv_timer_get_count_isr() - isr_count_total;  // Calc timer ticks since last reading
@@ -40,9 +41,12 @@ float f_measurement_get_val() {
     uint64_t count;
     float frequency = -1.0;
     if (xQueueReceive(isr_queue, &count, portMAX_DELAY) == pdTRUE) {
-        frequency = (float)(((uint64_t)40 * (uint64_t)1000000 * (uint64_t)PULSES_PER_MEAS) / count);  // Timer f: 40 MHz, 10 pulses
+        frequency = (float)(((40 * 1000000 * (uint64_t)PULSES_PER_MEAS)) / (float)count);  // Timer f: 40 MHz, PULSES_PER_MEAS pulses
+        frequency = (frequency > 51.0) ? 51.0 : frequency;                                 // Set upper limit to 51 Hz
+        frequency = (frequency < 49.0) ? 49.0 : frequency;                                 // Set lowe limit to 49 Hz
+
         // float time = (count * (float)2.5 / (float)1000000.0);
-        // ESP_LOGI(TAG, "| Count: %llu | Time: %.1lf ms | Freq: %lf Hz ", count, time, frequency);
+        // ESP_LOGD(TAG, "| Count: %llu | Time: %d ms | Freq: %.3lf Hz ", count, 0, frequency);
     }
     return frequency;
 }
@@ -98,13 +102,30 @@ esp_err_t f_measurement_init(uint64_t gpio_interrupt) {
  * @return Error code
  */
 static void ZCO_sim_task(void *param) {
+    vTaskDelay(200 / portTICK_PERIOD_MS);  // Initial delay to ensure smooth execution of the task
+    struct timeval time;
+    gettimeofday(&time, NULL);  // Copy current sys time to sys_time struct
+    srand(time.tv_sec);         // Initialise seed for the rand function
+
     uint64_t gpio_zco = (uint64_t)param;
     static uint8_t test_pin_state = 0;  // Variable with pin state (default 0)
-    for (int i = 0; i < 200; i++) {
-        gpio_set_level(gpio_zco, test_pin_state);  // Set the GPIO level according to the state
-        test_pin_state = !test_pin_state;          // Toggle the LED state
-        vTaskDelay(10 / portTICK_PERIOD_MS);       // Non blocking delay
+
+    for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < ((PULSES_PER_MEAS * 2) - 2); i++) {
+            gpio_set_level(gpio_zco, test_pin_state);  // Set the GPIO level according to the state
+            test_pin_state = !test_pin_state;          // Toggle the pin state
+            vTaskDelay(10 / portTICK_PERIOD_MS);       // Pulse period (high and low) 20 ms, frequency 50 Hz
+        }
+
+        const TickType_t rand_f = ((10 * (rand() % 3)) / portTICK_PERIOD_MS);  // Randomize frequency by inserting 0/1/2 ticks of delay
+        for (int i = 0; i < 2; i++) {
+            gpio_set_level(gpio_zco, test_pin_state);  // Set the GPIO level according to the state
+            test_pin_state = !test_pin_state;          // Toggle the LED state
+            vTaskDelay(rand_f);                        // Non blocking delay
+        }
     }
+    vTaskDelay(1000 / portTICK_PERIOD_MS);  // Wait for all measurement to finish
+    ESP_LOGW(TAG, "-------- End frequency measurement test --------\n");
     while (true) {
     }  // Infinite loop to keep task running
 }
