@@ -99,7 +99,6 @@ esp_err_t f_measurement_init(uint64_t gpio_interrupt) {
 /**
  * @brief Task responsible for simulating the zero-crossing output
  * @param *param pointer to the uint64_t var with the pin to be used for the test
- * @return Error code
  */
 static void ZCO_sim_task(void *param) {
     vTaskDelay(200 / portTICK_PERIOD_MS);  // Initial delay to ensure smooth execution of the task
