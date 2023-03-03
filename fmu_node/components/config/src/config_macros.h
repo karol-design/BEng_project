@@ -12,6 +12,10 @@
 #include "esp_err.h"
 #include "esp_log.h"
 
+/* PIN Assignment */
+#define ZCO_PIN 4
+#define TEST_PIN 12
+
 /* WiFi */
 #define WIFI_SSID "iPhone (Karol)"
 #define WIFI_PASS "karol1234"
