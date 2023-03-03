@@ -21,9 +21,10 @@
 #define TEST_PIN 12
 
 void app_main(void) {
-    esp_log_level_set("*", ESP_LOG_INFO);
+    esp_log_level_set("*", ESP_LOG_DEBUG);
     esp_err_t err = ESP_OK;
-    struct timeval time;
+    struct timeval time;     // Struct to hold current system time
+    mqtt_payload_t payload;  // MQTT Payload structure
 
     err = nvs_flash_init();  // Initialize NVS
     if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
@@ -47,15 +48,20 @@ void app_main(void) {
     ESP_ERROR_CHECK(f_measurement_test(TEST_PIN));  // Initialise ZCO simulation
 
     /**** Infinite measure - upload loop ****/
+    int64_t n = 0;
     while (true) {
-        float freq = f_measurement_get_val();  // Read frequency
-        if (freq != -1.0) {                    // Check if a new value was available
-            gettimeofday(&time, NULL);         // Copy current sys time to sys_time struct and calculate time in ms
-            uint64_t time_ms = (((uint64_t)time.tv_sec * 1000) + ((uint64_t)time.tv_usec / 1000));
-            ESP_LOGI(TAG, "| Freq: %.3lf Hz | UNIX Time: %llu ms", freq, time_ms);
-            char status[50];  // String to hold device status
-            sprintf(status, "Chip: %s | Free mem: %d bytes", CONFIG_IDF_TARGET, esp_get_free_heap_size());
-            mqtt_drv_send(freq, time_ms, status);  // Send frequency, time and status
+        payload.d[n % MQTT_MEAS_PER_BURST].f_hz = f_measurement_get_val();  // Read frequency
+        if (payload.d[n % MQTT_MEAS_PER_BURST].f_hz != -1.0) {              // Check if a new value was available
+            gettimeofday(&time, NULL);                                      // Copy current sys time to sys_time struct and calculate time in ms
+            payload.d[n % MQTT_MEAS_PER_BURST].t_ms = (((uint64_t)time.tv_sec * 1000) + ((uint64_t)time.tv_usec / 1000));
+            ESP_LOGI(TAG, "| Freq: %.3lf Hz | UNIX Time: %llu ms", payload.d[n % MQTT_MEAS_PER_BURST].f_hz, payload.d[n % MQTT_MEAS_PER_BURST].t_ms);
+            sprintf(payload.d[n % 10].dev_stat, "OK 0x0");
+
+            if (((n + 1) % MQTT_MEAS_PER_BURST) == 0) {
+                ESP_LOGI(TAG, "Sending %d new data points to the MQTT queue", MQTT_MEAS_PER_BURST);
+                ESP_ERROR_CHECK(mqtt_drv_queue_send(payload, sizeof(payload)));  // Send MQTT_MEAS_PER_BURST new datapoints to the que to be sent
+            }
+            n++;  // Increment data point number
         }
     }
 }

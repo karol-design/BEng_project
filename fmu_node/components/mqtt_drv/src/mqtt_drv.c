@@ -10,6 +10,7 @@
 
 esp_mqtt_client_handle_t client;          // MQTT Client handle
 static bool mqtt_connected_flag = false;  // Flag to indicate sucessfull connection to the MQTT broker
+static xQueueHandle mqtt_queue = NULL;    // Queu for data to be sent
 
 /**
  * @brief Event handler registered to receive MQTT events. This function is called by the MQTT client event loop.
@@ -50,8 +51,42 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
     }
 }
 
+/**
+ * @brief Getter function for checking if the device is connected to the MQTT broker
+ * @return True if connected to broker, False otherwise
+ */
 bool mqtt_drv_connected() {
     return mqtt_connected_flag;
+}
+
+/**
+ * @brief Send a new array of data structs to the MQTT que for data to be send
+ * @param ready_data Structure with datapoints to be sent
+ * @param data_size Size of the structure
+ * @return Error code
+ */
+esp_err_t mqtt_drv_queue_send(mqtt_payload_t ready_data, size_t data_size) {
+    if (xQueueSend(mqtt_queue, &ready_data, (TickType_t)0) == pdTRUE) {  // Send a new struct with an array of datapoints to the que
+        ESP_LOGI(TAG, "Data sucessfully sent to mqtt queue");
+        return ESP_OK;
+    } else {
+        return ESP_FAIL;
+    }
+}
+
+/**
+ * @brief Task for reading values from the data que and sending them in bursts of 10 through MQTT
+ */
+static void mqtt_drv_task(void *param) {
+    mqtt_payload_t data;  // Struct with the data to be sent
+    while (1) {
+        if (xQueueReceive(mqtt_queue, &data, (TickType_t)0) == pdTRUE) {  // Check if a pointer to a new data set is available (no blocking)
+            for (int i = 0; i < MQTT_MEAS_PER_BURST; i++) {               // Go through all data points and send them one-by-one
+                mqtt_drv_send(data.d[i].f_hz, data.d[i].t_ms, data.d[i].dev_stat);
+                vTaskDelay(MQTT_DELAY_BETWEEN_MESS / portTICK_PERIOD_MS);  // Wait for a set amount of ms before sending the next message
+            }
+        }
+    }
 }
 
 /**
@@ -60,9 +95,8 @@ bool mqtt_drv_connected() {
  * @param time_ms UNIX timestamp of the measurement [ms]
  * @param str_status Status of the device
  */
-void mqtt_drv_send(float frequency, uint64_t time_ms, const char *str_status) {
+static void mqtt_drv_send(float frequency, uint64_t time_ms, const char *str_status) {
     char message[100] = "field1=";
-
     char str_frequency[10];  // Declare char arrays for frequncy and time values
     char str_time[20];
 
@@ -76,7 +110,7 @@ void mqtt_drv_send(float frequency, uint64_t time_ms, const char *str_status) {
     strcat(message, str_status);
 
     int msg_id = esp_mqtt_client_publish(client, MQTT_FIELD_FREQ, message, 0, 0, 0);
-    ESP_LOGI(TAG, "Frequency, timestamp and status published successfully, msg_id = %d \n", msg_id);
+    ESP_LOGI(TAG, "Frequency, timestamp and status published successfully, msg_id = %d", msg_id);
 }
 
 /**
@@ -104,5 +138,10 @@ esp_err_t mqtt_drv_init() {
     } else {
         err = ESP_FAIL;
     }
+
+    mqtt_queue = xQueueCreate(1, sizeof(mqtt_payload_t));  // Create a queue for data to be sent
+    xTaskCreate(mqtt_drv_task, "MQTT_TASK", 8192, NULL, 10, NULL);  // Create and start the MQTT task
+    ESP_LOGI(TAG, "MQTT task initialised");
+
     return err;
 }
