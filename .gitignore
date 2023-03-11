@@ -1,6 +1,7 @@
-# VS code configuration
+# Configuration
 .vscode
 *.code-workspace
+desktop.ini
 
 # Output files
 build
