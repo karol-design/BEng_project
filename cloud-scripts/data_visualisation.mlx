@@ -1,32 +1,34 @@
-% Template MATLAB code for visualizing data from a channel as a 2D line
-% plot using PLOT function.
+% MATLAB script for visualizing data from a single HertzNet device
 
-% Prior to running this MATLAB code template, assign the channel variables.
-% Set 'readChannelID' to the channel ID of the channel to read from. 
-% Also, assign the read field ID to 'fieldID1'. 
-
-% TODO - Replace the [] with channel ID to read data from:
+% Channel ID to read data from:
 readChannelID = 2033438;
-% TODO - Replace the [] with the Field ID to read data from:
+
+% Field ID to read data from:
 fieldID1 = 1;
 fieldID2 = 2;
+fieldID3 = 3;
 
-% Channel Read API Key 
-% If your channel is private, then enter the read API
-% Key between the '' below: 
-readAPIKey = '';
+% Read number of measurement datapoints sent in the MQTT packet
+no_datapoints = thingSpeakRead(readChannelID, Field=fieldID3, NumPoints=1);
 
-%% Read Data %%
-frequency = thingSpeakRead(readChannelID, 'Field', fieldID1, 'NumPoints', 10);
-date = thingSpeakRead(readChannelID, 'Field', fieldID2, 'NumPoints', 10);
+%% Read Data csv packets using thingSpeak API and convert the output into numeric arrays %%
+tS_frequency_field = thingSpeakRead(readChannelID, Field=fieldID1, NumPoints=1, OutputFormat='table');
+tS_timestamp_field = thingSpeakRead(readChannelID, Field=fieldID2, NumPoints=1, OutputFormat='table');
+
+frequency_str = string(tS_frequency_field.Frequency);
+timestamp_str = string(tS_timestamp_field.Time);
+
+frequency_str_arr = sprintf('%s,', frequency_str);
+timestamp_str_arr = sprintf('%s,', timestamp_str);
+
+frequency_num_arr = sscanf(frequency_str_arr, '%g,', no_datapoints)
+timestamp_num_arr = sscanf(timestamp_str_arr, '%g,', no_datapoints)
+
+% Convert UNIX ms timestamps from MQTT packet to MATLAB time format
 T = datetime(1970,1,1,0,0,0,0,'TimeZone','UTC','F','uuuu-MM-dd''T''HH:mm:ss.SSS Z');
-addMS = milliseconds(date);
-out = addMS + T;
-
+addMS = milliseconds(timestamp_num_arr);
+timestamp_num_arr_converted = addMS + T;
 
 %% Visualize Data %%
-date
-out
-frequency
-plot(out, frequency);
-ylim([48 52])
+plot(timestamp_num_arr_converted, frequency_num_arr);
+%ylim([49.5 50.5])

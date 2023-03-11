@@ -95,19 +95,8 @@ static void mqtt_drv_task(void *param) {
  * @param time_ms UNIX timestamp of the measurement [ms]
  * @param str_status Status of the device
  */
-static void mqtt_drv_send(float frequency, uint64_t time_ms, const char *str_status) {
-    char message[100] = "field1=";
-    char str_frequency[10];  // Declare char arrays for frequncy and time values
-    char str_time[20];
-
-    sprintf(str_frequency, "%.3lf", frequency);  // Convert float frequency to str
-    sprintf(str_time, "%llu", time_ms);          // Convert llu int time_ms to str
-
-    strcat(message, str_frequency);  // Concatenate strings to create a message
-    strcat(message, "&field2=");
-    strcat(message, str_time);
-    strcat(message, "&status=");
-    strcat(message, str_status);
+void mqtt_drv_send() {
+    char message[200] = "field1=50.150, 50.000, 50.001, 49.960, 50.005, 50.012, 50.125, 50.560, 50.000, 49.920&field2=1, 2, 3, 4, 5, 6, 7, 8, 9, 10&field3=10";
 
     int msg_id = esp_mqtt_client_publish(client, MQTT_TOPIC, message, 0, 0, 0);
     ESP_LOGI(TAG, "Frequency, timestamp and status published successfully, msg_id = %d", msg_id);
