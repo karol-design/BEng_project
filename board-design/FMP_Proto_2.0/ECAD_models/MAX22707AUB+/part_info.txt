@@ -1,0 +1,9 @@
+Manufacturer=Maxim Integrated
+PartNumber=MAX22707AUB+
+PartCategory=Integrated Circuit
+PackageCategory=Small Outline Packages
+PinCount=10
+Version=3.1
+Released=2022-08-22 14:28:43
+Downloaded=2022-11-21 18:20:31
+3D=Y

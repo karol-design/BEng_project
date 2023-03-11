@@ -1,0 +1,8 @@
+Potential improvements circuit/PCB:
+- more SMD components (resistors, capacitors, chips) and hence smaller size, better decoupling, closer to professional devices
+- full galvanic isolation between mains voltage and logic sides (separate 5V power supply for the MAX IC)
+- better physical isolation / differentiation between mains voltage and logic sides
+- Live/Neutral swap protection, ideally in a form of a transformer with a bridge providing additional galvanic isolation and protection (very important, especially for EU plugs, which in most or all of the cases are unpolarised and there is no definite standard for the placement of Live / Neutral)
+- Replace DFRobot ESP32 dev board with own circuit and ESP32 chip
+- Replace the Earting wire (acts as a great victim of crosstalk from Live-Neutral loop, both capacitive and inductive crosstalk, if not connected to earth)
+- Add Live, Neutral, Boot SW, Project name etc. labels on the PCB

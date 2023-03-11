@@ -1,0 +1,9 @@
+Manufacturer=Vishay
+PartNumber=VOH1016AD
+PartCategory=Integrated Circuit
+PackageCategory=Dual-In-Line Packages
+PinCount=6
+Version=1.1
+Released=2019-09-12 11:36:38
+Downloaded=2022-11-21 19:42:59
+3D=Y
