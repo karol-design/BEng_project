@@ -1,0 +1,32 @@
+% Template MATLAB code for visualizing data from a channel as a 2D line
+% plot using PLOT function.
+
+% Prior to running this MATLAB code template, assign the channel variables.
+% Set 'readChannelID' to the channel ID of the channel to read from. 
+% Also, assign the read field ID to 'fieldID1'. 
+
+% TODO - Replace the [] with channel ID to read data from:
+readChannelID = 2033438;
+% TODO - Replace the [] with the Field ID to read data from:
+fieldID1 = 1;
+fieldID2 = 2;
+
+% Channel Read API Key 
+% If your channel is private, then enter the read API
+% Key between the '' below: 
+readAPIKey = '';
+
+%% Read Data %%
+frequency = thingSpeakRead(readChannelID, 'Field', fieldID1, 'NumPoints', 10);
+date = thingSpeakRead(readChannelID, 'Field', fieldID2, 'NumPoints', 10);
+T = datetime(1970,1,1,0,0,0,0,'TimeZone','UTC','F','uuuu-MM-dd''T''HH:mm:ss.SSS Z');
+addMS = milliseconds(date);
+out = addMS + T;
+
+
+%% Visualize Data %%
+date
+out
+frequency
+plot(out, frequency);
+ylim([48 52])
