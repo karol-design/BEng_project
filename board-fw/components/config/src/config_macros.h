@@ -36,10 +36,9 @@
 #define MQTT_PASSWORD "KBbyTJRU5/dlf+Fd+40Yu7pJ"             // Device Password
 #define MQTT_ID "MxEJJyY4MwYHCS0TNzksJx4"                    // Device ID
 #define MQTT_TOPIC "channels/2033438/publish"                // Frequency/time channel topic
-#define MQTT_MEAS_PER_BURST 80                               // Number of measurement per one burst MQTT upload
+#define MQTT_MEAS_PER_BURST 15                               // Number of measurement per one burst MQTT upload
 #define MQTT_MESSAGE_SIZE (30 + (MQTT_MEAS_PER_BURST * 15))  // Size of the MQTT message string
-#define MQTT_DELAY_BETWEEN_MESS 1000                         // Number of ms between adjacent MQTT messages
 
 /* Frequency measurement */
 #define ESP_INTR_FLAG_DEFAULT 0
-#define PULSES_PER_MEAS 12  // Number of interrupt pulses for one f measurement (50/... for meas per s)
+#define PULSES_PER_MEAS 25  // Number of interrupt pulses for one f measurement (50/... for meas per s)
