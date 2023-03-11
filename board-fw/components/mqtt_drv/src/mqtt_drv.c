@@ -81,31 +81,43 @@ static void mqtt_drv_task(void *param) {
     mqtt_payload_t data;  // Struct with the data to be sent
     while (1) {
         if (xQueueReceive(mqtt_queue, &data, (TickType_t)0) == pdTRUE) {  // Check if a pointer to a new data set is available (no blocking)
-            for (int i = 0; i < MQTT_MEAS_PER_BURST; i++) {               // Go through all data points and send them one-by-one
-                mqtt_drv_send(data.d[i].f_hz, data.d[i].t_ms, data.d[i].dev_stat);
-                vTaskDelay(MQTT_DELAY_BETWEEN_MESS / portTICK_PERIOD_MS);  // Wait for a set amount of ms before sending the next message
-            }
+            mqtt_drv_send(data, "Device OK 0x0");
         }
     }
 }
 
 /**
  * @brief Send MQTT message with frequency, time and status update
- * @param frequency Measured frequency [Hz]
- * @param time_ms UNIX timestamp of the measurement [ms]
+ * @param data MQTT payload structure with an array of datapoints (f_hz and t_ms)
  * @param str_status Status of the device
  */
-static void mqtt_drv_send(float frequency, uint64_t time_ms, const char *str_status) {
-    char message[100] = "field1=";
-    char str_frequency[10];  // Declare char arrays for frequncy and time values
-    char str_time[20];
+static void mqtt_drv_send(mqtt_payload_t data, const char *str_status) {
+    char message[MQTT_MESSAGE_SIZE] = "field1=";
 
-    sprintf(str_frequency, "%.3lf", frequency);  // Convert float frequency to str
-    sprintf(str_time, "%llu", time_ms);          // Convert llu int time_ms to str
+    char str_frequency[MQTT_MEAS_PER_BURST][10];  // Declare two arrays of strings for frequency...
+    char str_time[MQTT_MEAS_PER_BURST][20];       // ... and time values
 
-    strcat(message, str_frequency);  // Concatenate strings to create a message
+    for (int i = 0; i < MQTT_MEAS_PER_BURST; i++) {
+        sprintf(str_frequency[i], "%.3lf", data.d[i].f_hz);  // Convert float frequency to str
+        sprintf(str_time[i], "%llu", data.d[i].t_ms);        // Convert llu int time_ms to str
+    }
+
+    for (int i = 0; i < MQTT_MEAS_PER_BURST; i++) {
+        strcat(message, str_frequency[i]);  // Concatenate strings to create a message
+        strcat(message, ",");               // Add a coma to format datapoints as a csv packet
+    }
+
     strcat(message, "&field2=");
-    strcat(message, str_time);
+    for (int i = 0; i < MQTT_MEAS_PER_BURST; i++) {
+        strcat(message, str_time[i]);  // Concatenate strings to create a message
+        strcat(message, ",");
+    }
+
+    char str_no_datapoints[5];                              // String to hold no of datapoints in the MQTT message
+    sprintf(str_no_datapoints, "%d", MQTT_MEAS_PER_BURST);  // Convert no of datapoints to str
+    strcat(message, "&field3=");
+    strcat(message, str_no_datapoints);
+
     strcat(message, "&status=");
     strcat(message, str_status);
 
@@ -139,7 +151,7 @@ esp_err_t mqtt_drv_init() {
         err = ESP_FAIL;
     }
 
-    mqtt_queue = xQueueCreate(1, sizeof(mqtt_payload_t));  // Create a queue for data to be sent
+    mqtt_queue = xQueueCreate(1, sizeof(mqtt_payload_t));           // Create a queue for data to be sent
     xTaskCreate(mqtt_drv_task, "MQTT_TASK", 8192, NULL, 10, NULL);  // Create and start the MQTT task
     ESP_LOGI(TAG, "MQTT task initialised");
 

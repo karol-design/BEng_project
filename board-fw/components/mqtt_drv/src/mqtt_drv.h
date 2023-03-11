@@ -22,7 +22,6 @@
 typedef struct datapoint {  // Single datapoint data type
     float f_hz;             // Frequency in Hz
     uint64_t t_ms;          // Timestamp in ms as Unix time
-    char dev_stat[8];       // Device status
 } mqtt_datapoint_t;
 
 typedef struct payload {                      // MQTT payload wrapper data type
@@ -32,5 +31,5 @@ typedef struct payload {                      // MQTT payload wrapper data type
 esp_err_t mqtt_drv_init();
 esp_err_t mqtt_drv_queue_send(mqtt_payload_t ready_data, size_t data_size);
 static void mqtt_drv_task(void *param);
-static void mqtt_drv_send(float frequency, uint64_t time_ms, const char *str_status);
+static void mqtt_drv_send(mqtt_payload_t data, const char *str_status);
 bool mqtt_drv_connected();
