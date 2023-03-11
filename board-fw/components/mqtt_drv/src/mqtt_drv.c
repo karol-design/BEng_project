@@ -109,7 +109,7 @@ static void mqtt_drv_send(float frequency, uint64_t time_ms, const char *str_sta
     strcat(message, "&status=");
     strcat(message, str_status);
 
-    int msg_id = esp_mqtt_client_publish(client, MQTT_FIELD_FREQ, message, 0, 0, 0);
+    int msg_id = esp_mqtt_client_publish(client, MQTT_TOPIC, message, 0, 0, 0);
     ESP_LOGI(TAG, "Frequency, timestamp and status published successfully, msg_id = %d", msg_id);
 }
 
