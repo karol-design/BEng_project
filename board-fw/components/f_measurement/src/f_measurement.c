@@ -109,7 +109,7 @@ static void ZCO_sim_task(void *param) {
     uint64_t gpio_zco = (uint64_t)param;
     static uint8_t test_pin_state = 0;  // Variable with pin state (default 0)
 
-    for (int i = 0; i < 20; i++) {
+    for (int i = 0; i < 100; i++) {
         for (int i = 0; i < ((PULSES_PER_MEAS * 2) - 2); i++) {
             gpio_set_level(gpio_zco, test_pin_state);  // Set the GPIO level according to the state
             test_pin_state = !test_pin_state;          // Toggle the pin state
