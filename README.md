@@ -3,6 +3,8 @@
 ### BEng 3rd Year Individual Project | University of Manchester
 
 ![3D Model for Proto 3.0](https://i.ibb.co/phvMxHW/Proto3-0-3-D.png)
+<center>Figure 1. - 3D Model for Proto 3.0</center>
+
 
 ## About 
 HertzNet is a system for measuring mains (utility/line) frequency in different locations and aggregating collected data.
