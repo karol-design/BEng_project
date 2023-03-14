@@ -20,8 +20,8 @@
 #define TEST_PIN 12
 
 /* WiFi */
-#define WIFI_SSID "Internet-Enigma"
-#define WIFI_PASS "telewizor"
+#define WIFI_SSID "iPhone (Karol)"
+#define WIFI_PASS "karol1234"
 
 /* Timer */
 #define TIMER_DIVIDER (2)  //  Hardware timer clock divider (80/2 = 40 MHz)
