@@ -109,7 +109,7 @@ static void ZCO_sim_task(void *param) {
     uint64_t gpio_zco = (uint64_t)param;
     static uint8_t test_pin_state = 0;  // Variable with pin state (default 0)
 
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 100000; i++) {
         for (int i = 0; i < ((PULSES_PER_MEAS * 2) - 2); i++) {
             gpio_set_level(gpio_zco, test_pin_state);  // Set the GPIO level according to the state
             test_pin_state = !test_pin_state;          // Toggle the pin state
@@ -135,8 +135,8 @@ static void ZCO_sim_task(void *param) {
  * @return Error code
  */
 esp_err_t f_measurement_test(const uint64_t gpio_zco) {
-    gpio_reset_pin(gpio_zco);                                                          // Set the GPIO as a push/pull output
-    gpio_set_direction(gpio_zco, GPIO_MODE_OUTPUT);                                    // Set the GPIO as an output
+    gpio_reset_pin(gpio_zco);                                                         // Set the GPIO as a push/pull output
+    gpio_set_direction(gpio_zco, GPIO_MODE_OUTPUT);                                   // Set the GPIO as an output
     xTaskCreate(ZCO_sim_task, "ZCO_sim_task", 2048, (void *const)gpio_zco, 10, NULL);  // Start interrupt task
     ESP_LOGI(TAG, "Frequency measurement test initialised");
 
