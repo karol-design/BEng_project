@@ -78,10 +78,14 @@ esp_err_t mqtt_drv_queue_send(mqtt_payload_t ready_data, size_t data_size) {
  * @brief Task for reading values from the data que and sending them in bursts of 10 through MQTT
  */
 static void mqtt_drv_task(void *param) {
-    mqtt_payload_t data;  // Struct with the data to be sent
+    mqtt_payload_t data;               // Struct with the data to be sent
+    static uint64_t upload_count = 1;  // Upload counter variable
+    char status[40];
     while (1) {
-        if (xQueueReceive(mqtt_queue, &data, (TickType_t)0) == pdTRUE) {  // Check if a pointer to a new data set is available (no blocking)
-            mqtt_drv_send(data, "Device OK 0x0");
+        if (xQueueReceive(mqtt_queue, &data, (TickType_t)0) == pdTRUE) {    // Check if a pointer to a new data set is available (no blocking)
+            // Format device status string
+            sprintf(status, "Device OK, No. %03llu, MPB: %d, MPS: %d", upload_count++, MQTT_MEAS_PER_BURST, (50/PULSES_PER_MEAS)); 
+            mqtt_drv_send(data, status);
         }
     }
 }
@@ -93,6 +97,11 @@ static void mqtt_drv_task(void *param) {
  */
 static void mqtt_drv_send(mqtt_payload_t data, const char *str_status) {
     char message[MQTT_MESSAGE_SIZE] = "field1=";
+
+    for (int i = 0; i < MQTT_MEAS_PER_BURST; i++) {
+        data.d[i].t_ms -= 1600000000000;  // Decrement and divide ms data to facilitate more date per MQTT message
+        data.d[i].t_ms /= 100;
+    }
 
     char str_frequency[MQTT_MEAS_PER_BURST][10];  // Declare two arrays of strings for frequency...
     char str_time[MQTT_MEAS_PER_BURST][20];       // ... and time values
@@ -122,7 +131,7 @@ static void mqtt_drv_send(mqtt_payload_t data, const char *str_status) {
     strcat(message, str_status);
 
     int msg_id = esp_mqtt_client_publish(client, MQTT_TOPIC, message, 0, 0, 0);
-    ESP_LOGI(TAG, "Frequency, timestamp and status published successfully, msg_id = %d", msg_id);
+    ESP_LOGW(TAG, "Frequency, timestamp and status published successfully, msg_id = %d", msg_id);
 }
 
 /**
@@ -151,7 +160,7 @@ esp_err_t mqtt_drv_init() {
         err = ESP_FAIL;
     }
 
-    mqtt_queue = xQueueCreate(1, sizeof(mqtt_payload_t));           // Create a queue for data to be sent
+    mqtt_queue = xQueueCreate(1, sizeof(mqtt_payload_t));          // Create a queue for data to be sent
     xTaskCreate(mqtt_drv_task, "MQTT_TASK", 8192, NULL, 10, NULL);  // Create and start the MQTT task
     ESP_LOGI(TAG, "MQTT task initialised");
 
