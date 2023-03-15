@@ -1,5 +1,5 @@
 /**
- * @file    wifi_drv.c
+ * @file    wifi_drv.h
  * @brief   Initialize, configure and start Wi-Fi in a station mode, handle WiFi and IP events
  * @author  Karol Wojslaw (karol.wojslaw@student.manchester.ac.uk)
  */
