@@ -14,6 +14,7 @@
 #include "nvs_flash.h"
 #include "systime.h"
 #include "wifi_drv.h"
+#include "ws2812_drv.h"
 
 #define TAG "app"
 
@@ -53,7 +54,7 @@ void app_main(void) {
         if (payload.d[n % MQTT_MEAS_PER_BURST].f_hz != -1.0) {              // Check if a new value was available
             gettimeofday(&time, NULL);                                      // Copy current sys time to sys_time struct and calculate time in ms
             payload.d[n % MQTT_MEAS_PER_BURST].t_ms = (((uint64_t)time.tv_sec * 1000) + ((uint64_t)time.tv_usec / 1000));
-            // ESP_LOGI(TAG, "| Freq: %.3lf Hz | UNIX Time: %llu ms", payload.d[n % MQTT_MEAS_PER_BURST].f_hz, payload.d[n % MQTT_MEAS_PER_BURST].t_ms);
+            ESP_LOGI(TAG, "| Freq: %.3lf Hz | UNIX Time: %llu ms", payload.d[n % MQTT_MEAS_PER_BURST].f_hz, payload.d[n % MQTT_MEAS_PER_BURST].t_ms);
 
             if (((n + 1) % MQTT_MEAS_PER_BURST) == 0) {  // Send MQTT_MEAS_PER_BURST new datapoints through MQTT
                 ESP_LOGI(TAG, "Sending %d new data points to the MQTT queue", MQTT_MEAS_PER_BURST);
