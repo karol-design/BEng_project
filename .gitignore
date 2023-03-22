@@ -14,6 +14,9 @@ NOTES.md
 
 # Other files and folders
 Documentation (SDR, Layered structure, FSM etc.)
+Organisation
+Hardware
+System tests
 documentation
 dev
 ESP-IDF 4.4.lnk
