@@ -1,30 +1,22 @@
 /**
  * @file    ws2812_drv.h
  * @brief   Initialize and control WS2812 RGB LED
+ * @note    Based on https://github.com/JSchaenzle/ESP32-NeoPixel-WS2812-RMT
  * @author  Karol Wojslaw (karol.wojslaw@student.manchester.ac.uk)
  */
 
 #pragma once
 
-#include "config_macros.h"
-
 #include <stdint.h>
-#include "sdkconfig.h"
+
+#include "config_macros.h"
+#include "driver/rmt.h"
 #include "esp_err.h"
+#include "freertos/FreeRTOS.h"
 
-#define NUM_LEDS 1
+// 32-bit uint LED State type [from LSB: Byte 0 (Blue); Byte 1 (Green); Byte 2 (Red); Byte 3 (not used)]
+typedef uint32_t led_state_t;
 
-// This structure is used for indicating what the colors of each LED should be set to.
-// There is a 32bit value for each LED. Only the lower 3 bytes are used and they hold the
-// Red (byte 2), Green (byte 1), and Blue (byte 0) values to be set.
-struct led_state {
-    uint32_t leds[NUM_LEDS];
-};
-
-// Setup the hardware peripheral. Only call this once.
-esp_err_t ws2812_control_init(void);
-
-// Update the LEDs to the new state. Call as needed.
-// This function will block the current task until the RMT peripheral is finished sending 
-// the entire sequence.
-esp_err_t ws2812_write_leds(struct led_state);
+esp_err_t ws2812_drv_init(void);
+esp_err_t ws2812_drv_set_color(uint32_t r, uint32_t g, uint32_t b, uint32_t brightness);
+esp_err_t ws2812_drv_startup_animation(uint32_t brightness);
