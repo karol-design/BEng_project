@@ -19,6 +19,8 @@
 #define TAG "app"
 
 void app_main(void) {
+    ESP_ERROR_CHECK(ws2812_drv_init());
+    ESP_ERROR_CHECK(ws2812_drv_startup_animation(255));
     esp_err_t err = ESP_OK;
     struct timeval time;     // Struct to hold current system time
     mqtt_payload_t payload;  // MQTT Payload structure
@@ -29,12 +31,18 @@ void app_main(void) {
         err = nvs_flash_init();              // And try initialising it again
     }
 
+    ESP_ERROR_CHECK(ws2812_drv_set_color(10, 10, 100, 80));
     ESP_ERROR_CHECK(wifi_drv_init());          // Initialise WiFi
     while (wifi_drv_ip_assigned() == false) {  // Wait for the device to get an IP addr
     }
+    ESP_ERROR_CHECK(ws2812_drv_set_color(10, 10, 100, 255));
+    vTaskDelay(500 / portTICK_PERIOD_MS);
 
+    ESP_ERROR_CHECK(ws2812_drv_set_color(50, 100, 10, 80));
     ESP_ERROR_CHECK(systime_synchronise());  // Synchronise system time using SNTP
     systime_log();                           // Print synchronised time
+    ESP_ERROR_CHECK(ws2812_drv_set_color(50, 100, 10, 255));
+    vTaskDelay(500 / portTICK_PERIOD_MS);
 
     ESP_ERROR_CHECK(mqtt_drv_init());       // Initialise MQTT
     while (mqtt_drv_connected() != true) {  // Wait for the device to connect to the MQTT broker
@@ -59,6 +67,9 @@ void app_main(void) {
             if (((n + 1) % MQTT_MEAS_PER_BURST) == 0) {  // Send MQTT_MEAS_PER_BURST new datapoints through MQTT
                 ESP_LOGI(TAG, "Sending %d new data points to the MQTT queue", MQTT_MEAS_PER_BURST);
                 ESP_ERROR_CHECK(mqtt_drv_queue_send(payload, sizeof(payload)));
+                ESP_ERROR_CHECK(ws2812_drv_set_color(5, 150, 10, 150));
+                vTaskDelay(100 / portTICK_PERIOD_MS);
+                ESP_ERROR_CHECK(ws2812_drv_set_color(0, 0, 0, 0));
             }
             n++;  // Increment data point number
         }

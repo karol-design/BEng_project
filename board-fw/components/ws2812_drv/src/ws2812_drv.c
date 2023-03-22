@@ -84,7 +84,6 @@ esp_err_t ws2812_drv_set_color(uint32_t r, uint32_t g, uint32_t b, uint32_t brig
 
     led_state_t led_state = (((r | g) | b) & (0x00FFFFFF));  // Combine r, g and b values into one uint
     ESP_ERROR_CHECK(ws2812_drv_update(led_state));           // Update the LED
-    ESP_LOGI(TAG, "Set new color: 0x%.8x", led_state);
 
     return ESP_OK;
 }
@@ -95,6 +94,7 @@ esp_err_t ws2812_drv_set_color(uint32_t r, uint32_t g, uint32_t b, uint32_t brig
  * @return Error code
  */
 esp_err_t ws2812_drv_startup_animation(uint32_t brightness) {
+    ESP_LOGI(TAG, "Run startup animation");
     for (uint32_t i = 0; i < 100; i++) {  // Increase blue color intensity
         ESP_ERROR_CHECK(ws2812_drv_set_color(i, 0, i, brightness));
         vTaskDelay(10 / portTICK_PERIOD_MS);
