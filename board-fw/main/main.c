@@ -16,15 +16,10 @@
 #include "wifi_drv.h"
 #include "ws2812_drv.h"
 
-#define RED   0xFF0000
-#define GREEN 0x00FF00
-#define BLUE  0x0000FF
-
 #define TAG "app"
 
 void app_main(void) {
     esp_err_t err = ESP_OK;
-    struct led_state led_state_s;
 
     err = nvs_flash_init();  // Initialize NVS
     if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
@@ -32,17 +27,15 @@ void app_main(void) {
         err = nvs_flash_init();              // And try initialising it again
     }
 
-    ws2812_control_init();
+    ESP_ERROR_CHECK(ws2812_drv_init());  // Initialise WS2812 LED Driver
+    ESP_ERROR_CHECK(ws2812_drv_startup_animation(255));  // Run Startup animation
 
     while (1) {
-        led_state_s.leds[0] = RED;
-        ws2812_write_leds(led_state_s);
         vTaskDelay(2000 / portTICK_PERIOD_MS);
-        led_state_s.leds[0] = GREEN;
-        ws2812_write_leds(led_state_s);
+        ws2812_drv_set_color(255,10,10,80);  
         vTaskDelay(2000 / portTICK_PERIOD_MS);
-        led_state_s.leds[0] = BLUE;
-        ws2812_write_leds(led_state_s);
+        ws2812_drv_set_color(10,255,10,80);  
         vTaskDelay(2000 / portTICK_PERIOD_MS);
+        ws2812_drv_set_color(10,10,255,80);  
     }
 }
