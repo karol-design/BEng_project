@@ -27,4 +27,4 @@ esp_err_t ws2812_control_init(void);
 // Update the LEDs to the new state. Call as needed.
 // This function will block the current task until the RMT peripheral is finished sending 
 // the entire sequence.
-esp_err_t ws2812_write_leds(struct led_state new_state);
+esp_err_t ws2812_write_leds(struct led_state);

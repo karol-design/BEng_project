@@ -6,33 +6,30 @@
 
 #include "ws2812_drv.h"
 
-#define TAG "ws2812_drv"
-
 #include "driver/rmt.h"
 #include "esp_err.h"
 #include "esp_check.h"
 
+#define TAG "ws2812_drv"
+
 // Configure these based on your project needs using menuconfig ********
-#define LED_RMT_TX_CHANNEL		1
-#define LED_RMT_TX_GPIO			5
+#define LED_RMT_TX_CHANNEL  1
+#define LED_RMT_TX_GPIO 5
 // ****************************************************
 
 #define BITS_PER_LED_CMD	24
 #define LED_BUFFER_ITEMS	(NUM_LEDS * BITS_PER_LED_CMD)
 
 // These values are determined by measuring pulse timing with logic analyzer and adjusting to match datasheet. 
-#define T0H	CONFIG_WS2812_T0H  // 0 bit high time
-#define T1H	CONFIG_WS2812_T1H  // 1 bit high time
-#define T0L	CONFIG_WS2812_T0L  // low time for either bit
-#define T1L	CONFIG_WS2812_T1L
-
-// Tag for log messages
-static const char *TAG = "NeoPixel WS2812 Driver";
+#define T0H	14  // 0 bit high time
+#define T1H	28  // 1 bit high time
+#define T0L	32  // low time for either bit
+#define T1L	24
 
 // This is the buffer which the hw peripheral will access while pulsing the output pin
 static rmt_item32_t led_data_buffer[LED_BUFFER_ITEMS];
 
-static void setup_rmt_data_buffer(struct led_state new_state);
+static void setup_rmt_data_buffer(struct led_state);
 
 esp_err_t ws2812_control_init(void)
 {
