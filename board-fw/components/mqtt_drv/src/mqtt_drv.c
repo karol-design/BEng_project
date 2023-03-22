@@ -75,22 +75,6 @@ esp_err_t mqtt_drv_queue_send(mqtt_payload_t ready_data, size_t data_size) {
 }
 
 /**
- * @brief Task for reading values from the data que and sending them in bursts of 10 through MQTT
- */
-static void mqtt_drv_task(void *param) {
-    mqtt_payload_t data;               // Struct with the data to be sent
-    static uint64_t upload_count = 1;  // Upload counter variable
-    char status[40];
-    while (1) {
-        if (xQueueReceive(mqtt_queue, &data, (TickType_t)0) == pdTRUE) {    // Check if a pointer to a new data set is available (no blocking)
-            // Format device status string
-            sprintf(status, "Device OK, No. %03llu, MPB: %d, MPS: %d", upload_count++, MQTT_MEAS_PER_BURST, (50/PULSES_PER_MEAS)); 
-            mqtt_drv_send(data, status);
-        }
-    }
-}
-
-/**
  * @brief Send MQTT message with frequency, time and status update
  * @param data MQTT payload structure with an array of datapoints (f_hz and t_ms)
  * @param str_status Status of the device
@@ -132,6 +116,22 @@ static void mqtt_drv_send(mqtt_payload_t data, const char *str_status) {
 
     int msg_id = esp_mqtt_client_publish(client, MQTT_TOPIC, message, 0, 0, 0);
     ESP_LOGW(TAG, "Frequency, timestamp and status published successfully, msg_id = %d", msg_id);
+}
+
+/**
+ * @brief Task for reading values from the data que and sending them in bursts of 10 through MQTT
+ */
+static void mqtt_drv_task(void *param) {
+    mqtt_payload_t data;               // Struct with the data to be sent
+    static uint64_t upload_count = 1;  // Upload counter variable
+    char status[40];
+    while (1) {
+        if (xQueueReceive(mqtt_queue, &data, (TickType_t)0) == pdTRUE) {    // Check if a pointer to a new data set is available (no blocking)
+            // Format device status string
+            sprintf(status, "Device OK, No. %03llu, MPB: %d, MPS: %d", upload_count++, MQTT_MEAS_PER_BURST, (50/PULSES_PER_MEAS)); 
+            mqtt_drv_send(data, status);
+        }
+    }
 }
 
 /**
