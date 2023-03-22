@@ -18,6 +18,15 @@
 /* PIN Assignment */
 #define ZCO_PIN 4
 #define TEST_PIN 12
+#define WS2812_PIN 5
+
+/* WS2812 & RMT*/
+#define WS2812_RMT_CHANNEL 1    // RMT channel to be used for WS2812
+#define WS2812_BITS_PER_CMD 24  // No of bits per command
+#define WS2812_T0H 14           // Bit 0, high time
+#define WS2812_T1H 28           // Bit 1, low time
+#define WS2812_T0L 32           // Bit 0, low time
+#define WS2812_T1L 24           // Bit 1, high time
 
 /* WiFi */
 #define WIFI_SSID "AVENUES 1ST FLOOR"

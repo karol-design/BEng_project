@@ -30,6 +30,4 @@ typedef struct payload {                      // MQTT payload wrapper data type
 
 esp_err_t mqtt_drv_init();
 esp_err_t mqtt_drv_queue_send(mqtt_payload_t ready_data, size_t data_size);
-static void mqtt_drv_task(void *param);
-static void mqtt_drv_send(mqtt_payload_t data, const char *str_status);
 bool mqtt_drv_connected();
