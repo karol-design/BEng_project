@@ -1,4 +1,4 @@
-name: Espressif IoT Development Framework (ESP-IDF)
+name: ESP32 Build
 
 on:
   workflow_dispatch:
