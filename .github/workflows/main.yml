@@ -9,10 +9,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    #- name: Checkout repo
-    #  uses: actions/checkout@v2
-    #  with:
-    #    submodules: 'recursive'
+    - name: Checkout repo
+      uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
     - name: esp-idf build
       uses: espressif/esp-idf-ci-action@v1
       with:
