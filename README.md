@@ -1,10 +1,9 @@
-# HertzNet
-## High-accuracy Wireless Mains Frequency Measurement System
-### BEng 3rd Year Individual Project | University of Manchester
+## HertzNet | High-accuracy Wireless Mains Frequency Measurement System
+BEng 3rd Year Individual Project | University of Manchester
 
-![3D Model for Proto 3.0](https://i.ibb.co/phvMxHW/Proto3-0-3-D.png)
-<center>Figure 1. - 3D Model for Proto 3.0</center>
+### CI Workflow results
 
+![ESP-IDF CI Build](https://github.com/karol-design/HertzNet/actions/workflows/main.yml/badge.svg)
 
 ## About 
 HertzNet is a system for measuring mains (utility/line) frequency in different locations and aggregating collected data.
@@ -23,3 +22,6 @@ data and makes it searchable and well-presented.
 Commit to the main only the code that compile without any warnings or errors.
 To test, compile or flash the code use ESP-IDF 4.4
 
+### HertzNet Proto 3.0
+![3D Model for Proto 3.0](https://i.ibb.co/phvMxHW/Proto3-0-3-D.png)
+<center>Figure 1. - 3D Model for Proto 3.0</center>
