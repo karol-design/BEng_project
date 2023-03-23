@@ -3,7 +3,8 @@ BEng 3rd Year Individual Project | University of Manchester
 
 ### CI Workflow results
 
-![ESP-IDF CI Build](https://github.com/karol-design/HertzNet/actions/workflows/esp32_build.yml/badge.svg) ![LOC Count](https://github.com/karol-design/HertzNet/actions/workflows/loc_count.yml/badge.svg)
+![ESP-IDF CI Build](https://github.com/karol-design/HertzNet/actions/workflows/esp32_build.yml/badge.svg) [![Generic badge](https://img.shields.io/badge/Thingspeak_Dashboard_-running-green.svg)](https://thingspeak.com/channels/2033438)
+
 
 ## About 
 HertzNet is a system for measuring mains (utility/line) frequency in different locations and aggregating collected data.
