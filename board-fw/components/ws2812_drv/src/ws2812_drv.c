@@ -110,10 +110,12 @@ esp_err_t ws2812_drv_startup_animation(uint32_t brightness) {
         vTaskDelay(20 / portTICK_PERIOD_MS);
     }
 
-    for (uint32_t i = brightness; i > 50; i--) {  // Mix all three colors slowly increasing their intensity
+    for (uint32_t i = brightness; i > 0; i--) {  // Mix all three colors slowly increasing their intensity
         ESP_ERROR_CHECK(ws2812_drv_set_color(240, 215, 245, i));
-        vTaskDelay(5 / portTICK_PERIOD_MS);
+        vTaskDelay(10 / portTICK_PERIOD_MS);
     }
+    
+    vTaskDelay(100 / portTICK_PERIOD_MS);
 
     return ESP_OK;
 }
