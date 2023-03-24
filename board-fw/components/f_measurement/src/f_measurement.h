@@ -16,7 +16,6 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
 #include "freertos/task.h"
-#include "systime.h"
 
 typedef struct measurement {  // Single measurement datatype
     float freq;

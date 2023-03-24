@@ -7,6 +7,7 @@
 #include "f_measurement.h"
 
 #include "timer_drv.h"
+#include "systime.h"
 
 #define TAG "f_measurement"
 
@@ -91,9 +92,9 @@ esp_err_t f_measurement_init(uint64_t gpio_interrupt) {
     err = intr_gpio_config(gpio_input_pin_select);  // Initialise gpio for the interrupt
     ESP_ERROR_CHECK(err);
 
-    // Create a queue to handle up to 10 frequency measurements and timestamps from the isr
-    isr_count_queue = xQueueCreate(10, sizeof(uint64_t));
-    isr_time_queue = xQueueCreate(10, sizeof(uint64_t));
+    // Create a queue to handle up to one burst of frequency measurements and timestamps from the isr
+    isr_count_queue = xQueueCreate(MQTT_MEAS_PER_BURST, sizeof(uint64_t));
+    isr_time_queue = xQueueCreate(MQTT_MEAS_PER_BURST, sizeof(uint64_t));
 
     err = gpio_install_isr_service(ESP_INTR_FLAG_DEFAULT);  // Install gpio isr service
     ESP_ERROR_CHECK(err);
