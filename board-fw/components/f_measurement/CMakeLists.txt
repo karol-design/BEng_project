@@ -1,4 +1,4 @@
 idf_component_register(
     SRC_DIRS "src"
     INCLUDE_DIRS "src"
-    PRIV_REQUIRES config timer_drv)
+    PRIV_REQUIRES config timer_drv systime)

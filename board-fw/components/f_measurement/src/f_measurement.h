@@ -17,6 +17,11 @@
 #include "freertos/queue.h"
 #include "freertos/task.h"
 
+typedef struct measurement {  // Single measurement datatype
+    float freq;
+    uint64_t time;
+} f_measurement_t;
+
 esp_err_t f_measurement_init(uint64_t gpio_interrupt);
 esp_err_t f_measurement_test(const uint64_t gpio_zco);
-float f_measurement_get_val();
+f_measurement_t f_measurement_get_val();

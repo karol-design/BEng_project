@@ -7,10 +7,12 @@
 #include "f_measurement.h"
 
 #include "timer_drv.h"
+#include "systime.h"
 
 #define TAG "f_measurement"
 
-static xQueueHandle isr_queue = NULL;  // Queu for sending measured time
+static xQueueHandle isr_count_queue = NULL;  // Queu for sending measured time
+static xQueueHandle isr_time_queue = NULL;   // Queu for sending measured time
 
 /**
  * @brief Interrupt Service Routine Handler
@@ -19,15 +21,21 @@ static void IRAM_ATTR isr_handler(void *arg) {
     static uint64_t isr_count_total = 0;  // Number of timer ticks since timer init
     static uint64_t isr_pulses = 0;       // Number of interrupt pulses (isr calls)
     static uint64_t isr_count = 0;        // Number of timer ticks since last reading
+    static uint64_t time_ms = 0;          // Time of measurement in ms
+    struct timeval time;                  // Struct to hold current system time
 
     if (isr_pulses == 1) {
         isr_count_total = drv_timer_get_count_isr();  // Reset the isr_count_total with the first pulse
     }
 
-    if ((isr_pulses % PULSES_PER_MEAS) == 0) {                    // Every PULSES_PER_MEAS
+    if ((isr_pulses % PULSES_PER_MEAS) == 0) {  // Every PULSES_PER_MEAS
+        gettimeofday(&time, NULL);              // Copy current sys time to sys_time struct and calc time in ms
+        time_ms = (((uint64_t)time.tv_sec * 1000) + ((uint64_t)time.tv_usec / 1000));
         isr_count = drv_timer_get_count_isr() - isr_count_total;  // Calc timer ticks since last reading
         isr_count_total = drv_timer_get_count_isr();
-        xQueueSendFromISR(isr_queue, &isr_count, NULL);  // Send it to the queue
+
+        xQueueSendFromISR(isr_count_queue, &isr_count, NULL);  // Send frequency value to the queue
+        xQueueSendFromISR(isr_time_queue, &time_ms, NULL);     // Send timestamp to the queue
     }
 
     isr_pulses++;  // Increment pulses count each time ISR is executed
@@ -37,18 +45,19 @@ static void IRAM_ATTR isr_handler(void *arg) {
  * @brief Read measured frequency if a new value is available
  * @return Frequency or -1 if no new value is available
  */
-float f_measurement_get_val() {
+f_measurement_t f_measurement_get_val() {
     uint64_t count;
-    float frequency = -1.0;
-    if (xQueueReceive(isr_queue, &count, portMAX_DELAY) == pdTRUE) {
-        frequency = (float)(((40 * 1000000 * (uint64_t)PULSES_PER_MEAS)) / (float)count);  // Timer f: 40 MHz, PULSES_PER_MEAS pulses
-        frequency = (frequency > 51.0) ? 51.0 : frequency;                                 // Set upper limit to 51 Hz
-        frequency = (frequency < 49.0) ? 49.0 : frequency;                                 // Set lowe limit to 49 Hz
+    f_measurement_t meas = {.freq = -1.0, .time = 0};  // Initialise measurement struct as invalid
 
-        // float time = (count * (float)2.5 / (float)1000000.0);
-        // ESP_LOGD(TAG, "| Count: %llu | Time: %d ms | Freq: %.3lf Hz ", count, 0, frequency);
+    if (xQueueReceive(isr_count_queue, &count, portMAX_DELAY) == pdTRUE) {
+        // Timer f: 40 MHz, PULSES_PER_MEAS pulses
+        meas.freq = (float)(((40 * 1000000 * (uint64_t)PULSES_PER_MEAS)) / (float)count);
+        meas.freq = (meas.freq > 51.0) ? 51.0 : meas.freq;  // Set the upper limit to 51 Hz
+        meas.freq = (meas.freq < 49.0) ? 49.0 : meas.freq;  // Set the lowee limit to 49 Hz
+        xQueueReceive(isr_time_queue, &(meas.time), portMAX_DELAY);
     }
-    return frequency;
+
+    return meas;
 }
 
 /**
@@ -83,8 +92,9 @@ esp_err_t f_measurement_init(uint64_t gpio_interrupt) {
     err = intr_gpio_config(gpio_input_pin_select);  // Initialise gpio for the interrupt
     ESP_ERROR_CHECK(err);
 
-    // Create a queue to handle timer measurements from the isr
-    isr_queue = xQueueCreate(10, sizeof(uint64_t));
+    // Create a queue to handle up to one burst of frequency measurements and timestamps from the isr
+    isr_count_queue = xQueueCreate(MQTT_MEAS_PER_BURST, sizeof(uint64_t));
+    isr_time_queue = xQueueCreate(MQTT_MEAS_PER_BURST, sizeof(uint64_t));
 
     err = gpio_install_isr_service(ESP_INTR_FLAG_DEFAULT);  // Install gpio isr service
     ESP_ERROR_CHECK(err);
@@ -135,8 +145,8 @@ static void ZCO_sim_task(void *param) {
  * @return Error code
  */
 esp_err_t f_measurement_test(const uint64_t gpio_zco) {
-    gpio_reset_pin(gpio_zco);                                                         // Set the GPIO as a push/pull output
-    gpio_set_direction(gpio_zco, GPIO_MODE_OUTPUT);                                   // Set the GPIO as an output
+    gpio_reset_pin(gpio_zco);                                                          // Set the GPIO as a push/pull output
+    gpio_set_direction(gpio_zco, GPIO_MODE_OUTPUT);                                    // Set the GPIO as an output
     xTaskCreate(ZCO_sim_task, "ZCO_sim_task", 2048, (void *const)gpio_zco, 10, NULL);  // Start interrupt task
     ESP_LOGI(TAG, "Frequency measurement test initialised");
 
