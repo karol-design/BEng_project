@@ -13,4 +13,6 @@
 #include "config_macros.h"
 
 esp_err_t wifi_drv_init();
-uint8_t wifi_drv_ip_assigned();
+uint8_t wifi_drv_connected();
+uint8_t wifi_drv_fault();
+int8_t wifi_drv_get_rssi();

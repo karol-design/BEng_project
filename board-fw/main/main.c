@@ -31,9 +31,10 @@ void app_main(void) {
     }
 
     ESP_ERROR_CHECK(ws2812_drv_set_color(10, 10, 100, 60));
-    ESP_ERROR_CHECK(wifi_drv_init());          // Initialise WiFi
-    while (wifi_drv_ip_assigned() == false) {  // Wait for the device to get an IP addr
+    ESP_ERROR_CHECK(wifi_drv_init());        // Initialise WiFi
+    while (wifi_drv_connected() == false) {  // Wait for the device to connect to the AP
     }
+    ESP_LOGI(TAG, "WiFi RSSI: %d", wifi_drv_get_rssi());
     ESP_ERROR_CHECK(ws2812_drv_set_color(10, 10, 100, 255));
     vTaskDelay(500 / portTICK_PERIOD_MS);
 
@@ -58,13 +59,16 @@ void app_main(void) {
     /**** Infinite measure - upload loop ****/
     int64_t n = 0;
     while (true) {
+        if (wifi_drv_fault() == true) {
+            esp_restart();  // Restart the microcontroller
+        }
         f_measurement_t meas = f_measurement_get_val();       // Read frequency and timestamp
         payload.d[n % MQTT_MEAS_PER_BURST].f_hz = meas.freq;  // Copy the frequency value to payload
         payload.d[n % MQTT_MEAS_PER_BURST].t_ms = meas.time;  // Copy the timestamp to payload
 
         if (payload.d[n % MQTT_MEAS_PER_BURST].f_hz != -1.0) {  // Check if a new value was available
             if (((n + 1) % MQTT_MEAS_PER_BURST) == 0) {         // Send MQTT_MEAS_PER_BURST new datapoints through MQTT
-                ESP_LOGI(TAG, "Sending %d new data points to the MQTT queue", MQTT_MEAS_PER_BURST);
+                ESP_LOGD(TAG, "Sending %d new data points to the MQTT queue", MQTT_MEAS_PER_BURST);
                 ESP_ERROR_CHECK(mqtt_drv_queue_send(payload, sizeof(payload)));
                 ESP_ERROR_CHECK(ws2812_drv_set_color(0, 250, 10, 255));
                 vTaskDelay(60 / portTICK_PERIOD_MS);

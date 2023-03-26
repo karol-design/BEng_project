@@ -9,6 +9,7 @@
 #define TAG "wifi_drv"
 
 static uint8_t ip_assigned = false;  // IP assigned by the AP flag
+static uint8_t wifi_fault_event = false;  // WiFi Disconnected or IP lost flag
 
 /**
  * @brief WIFI and IP events handler
@@ -16,12 +17,19 @@ static uint8_t ip_assigned = false;  // IP assigned by the AP flag
 static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data) {
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
         esp_wifi_connect();
+    } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_CONNECTED) {
+        ESP_LOGW(TAG, "Device connected to the AP");
     } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
         esp_wifi_connect();
+        ESP_LOGW(TAG, "Device disconnected from the AP");
+        wifi_fault_event = true;
     } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
         ip_event_got_ip_t* event = (ip_event_got_ip_t*)event_data;
-        ESP_LOGI(TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
+        ESP_LOGI(TAG, "Got ip:" IPSTR, IP2STR(&event->ip_info.ip));
         ip_assigned = true;
+    } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_LOST_IP) {
+        ESP_LOGW(TAG, "Lost IP Event");
+        wifi_fault_event = true;   
     }
 }
 
@@ -29,8 +37,26 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
  * @brief Test whether an IP adress has been already assigned to the device by the AP
  * @return got_ip flag value
  */
-uint8_t wifi_drv_ip_assigned() {
+uint8_t wifi_drv_connected() {
     return ip_assigned;
+}
+
+/**
+ * @brief Test whether a lost IP or WiFi Disconnected events happened and if a restart is required
+ * @return wifi_fault_event flag value
+ */
+uint8_t wifi_drv_fault() {
+    return wifi_fault_event;
+}
+
+/**
+ * @brief Get the RSSI of the WiFi Access Point
+ * @return rssi_value
+ */
+int8_t wifi_drv_get_rssi() {
+    wifi_ap_record_t wifi_ap_info;
+    ESP_ERROR_CHECK(esp_wifi_sta_get_ap_info(&wifi_ap_info));
+    return (wifi_ap_info.rssi);
 }
 
 /**
