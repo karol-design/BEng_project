@@ -28,7 +28,7 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
             mqtt_connected_flag = true;
             break;
         case MQTT_EVENT_DISCONNECTED:
-            ESP_LOGI(TAG, "MQTT_EVENT_DISCONNECTED");
+            ESP_LOGW(TAG, "MQTT_EVENT_DISCONNECTED");
             mqtt_connected_flag = false;
             break;
         case MQTT_EVENT_PUBLISHED:
@@ -42,7 +42,7 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
         case MQTT_EVENT_ERROR:
             ESP_LOGI(TAG, "MQTT_EVENT_ERROR");
             if (event->error_handle->error_type == MQTT_ERROR_TYPE_TCP_TRANSPORT) {
-                ESP_LOGI(TAG, "Last errno string (%s)", strerror(event->error_handle->esp_transport_sock_errno));
+                ESP_LOGE(TAG, "Last error string (%s)", strerror(event->error_handle->esp_transport_sock_errno));
             }
             break;
         default:
@@ -67,7 +67,7 @@ bool mqtt_drv_connected() {
  */
 esp_err_t mqtt_drv_queue_send(mqtt_payload_t ready_data, size_t data_size) {
     if (xQueueSend(mqtt_queue, &ready_data, (TickType_t)0) == pdTRUE) {  // Send a new struct with an array of datapoints to the que
-        ESP_LOGI(TAG, "Data sucessfully sent to mqtt queue");
+        ESP_LOGD(TAG, "Data sucessfully sent to mqtt queue");
         return ESP_OK;
     } else {
         return ESP_FAIL;
@@ -115,8 +115,6 @@ static void mqtt_drv_send(mqtt_payload_t data, const char *str_status) {
     strcat(message, str_status);
 
     int msg_id = esp_mqtt_client_publish(client, MQTT_TOPIC, message, 0, 0, 0);
-    // ESP_LOGW(TAG, "Message: %s", message);
-    ESP_LOGW(TAG, "Frequency, timestamp and status published successfully, msg_id = %d", msg_id);
 }
 
 /**
@@ -131,6 +129,7 @@ static void mqtt_drv_task(void *param) {
             // Format device status string
             sprintf(status, "Device OK, No. %03llu, MPB: %d, MPS: %d", upload_count++, MQTT_MEAS_PER_BURST, (50/PULSES_PER_MEAS)); 
             mqtt_drv_send(data, status);
+            ESP_LOGI(TAG, "Datapoint succesfully published, no. %03llu", (upload_count-1));
         }
     }
 }
