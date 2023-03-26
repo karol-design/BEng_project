@@ -29,8 +29,8 @@
 #define WS2812_T1L 24           // Bit 1, high time
 
 /* WiFi */
-#define WIFI_SSID "iPhone (Karol)"
-#define WIFI_PASS "karol1234"
+#define WIFI_SSID "Internet-Enigma_EXT"
+#define WIFI_PASS "telewizor"
 
 /* Timer */
 #define TIMER_DIVIDER (2)  //  Hardware timer clock divider (80/2 = 40 MHz)
