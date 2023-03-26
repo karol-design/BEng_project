@@ -43,7 +43,7 @@ struct timeval systime_log() {
     time(&now);          // Copy the current system time to the variable now
     char strftime_buf[64];
 
-    setenv("TZ", "GMTGMT-1,M3.4.0/01,M10.4.0/02", 1);  // Set environmental var TZ to UK timezone
+    setenv("TZ", "GMTGMT,M3.4.0/01,M10.4.0/02", 1);  // Set environmental var TZ to UK timezone
     tzset();                                           // Apply the timezone (TZ env variable value)
     localtime_r(&now, &timeinfo);                      // Convert time into calendar time (local time) in the struct tm format
 
