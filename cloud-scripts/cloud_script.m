@@ -1,7 +1,7 @@
 % MATLAB script for visualizing data from a single HertzNet device
 
 % Number of packets to display on a single graph
-no_of_packets = 80;
+no_of_packets = 1200;
 
 % Channel ID to read data from:
 readChannelID = 2033438;
@@ -31,7 +31,7 @@ timestamp_num_arr = timestamp_num_arr * 100;
 timestamp_num_arr = timestamp_num_arr + 1600000000000;
 
 % Convert UNIX ms timestamps from MQTT packet to MATLAB time format
-T = datetime(1970,1,1,0,0,0,0,'TimeZone','UTC','F','uuuu-MM-dd''T''HH:mm:ss.SSS Z');
+T = datetime(1970,1,1,0,0,0,0,'TimeZone','UTC+2','F','uuuu-MM-dd''T''HH:mm:ss.SSS Z');
 addMS = milliseconds(timestamp_num_arr);
 timestamp_num_arr_converted = addMS + T;
  
@@ -49,7 +49,7 @@ for i = 2:no_of_packets
     timestamp_num_arr = timestamp_num_arr + 1600000000000;
 
     % Convert UNIX ms timestamps from MQTT packet to MATLAB time format
-    T = datetime(1970,1,1,0,0,0,0,'TimeZone','UTC','F','uuuu-MM-dd''T''HH:mm:ss.SSS Z');
+    T = datetime(1970,1,1,0,0,0,0,'TimeZone','UTC+2','F','uuuu-MM-dd''T''HH:mm:ss.SSS Z');
     addMS = milliseconds(timestamp_num_arr);
     timestamp_num_arr_converted = addMS + T;
     
@@ -69,23 +69,28 @@ for i = 1:((no_of_packets*no_datapoints)-1)
     end
 end
 
-%k = no_of_packets / 100;
-%plot_freq_moving_avg = movmean(plot_freq, k);
+k = no_of_packets / 100;
+plot_freq_moving_avg = movmean(plot_freq, k);
 freq_mean = mean(plot_freq);
 N = no_of_packets*no_datapoints;
 plot_freq_mean = zeros(N,1) + freq_mean;
 
     
 %% Visualize Data %%
-freq_max = max(plot_freq) + 0.03;
-freq_min = min(plot_freq) - 0.03;
-p1 = plot(plot_time, plot_freq);
+freq_max = max(plot_freq) + 0.04;
+freq_min = min(plot_freq) - 0.04;
+
+step = 1; %no_of_packets/100;
+step = uint64(step);
+p1 = plot(plot_time(1:step:end), plot_freq(1:step:end));
 p1.Color = '#D95319';
 xlabel('Time');
 ylabel('Frequency [Hz]');
 
 hold on;
-
 p2 = plot(plot_time, plot_freq_mean, ':');
 p2.Color = '#FF0000';
+
 ylim([freq_min freq_max]);
+
+
