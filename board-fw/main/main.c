@@ -60,6 +60,7 @@ void app_main(void) {
     int64_t n = 0;
     while (true) {
         if (wifi_drv_fault() == true || mqtt_drv_connected() == false) {
+            ESP_LOGE(TAG, "WiFi drv fault: %d || MQTT drv connected: %d", wifi_drv_fault(), mqtt_drv_connected());
             esp_restart();  // Reboot the microcontroller
         }
         f_measurement_t meas = f_measurement_get_val();       // Read frequency and timestamp
