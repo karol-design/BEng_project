@@ -39,6 +39,9 @@ static void IRAM_ATTR isr_handler(void *arg) {
     isr_pulses++;  // Increment pulses count each time ISR is executed
 }
 
+/**
+ * @brief Frequency measurement task responsible for timestamping and queueing measurements
+ */
 static void f_measurement_task(void *param) {
     while (true) {
         static uint64_t time_ms = 0;  // Time of measurement in ms
