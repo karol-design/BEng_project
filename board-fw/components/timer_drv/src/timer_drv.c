@@ -22,8 +22,6 @@ uint64_t IRAM_ATTR drv_timer_get_count_isr() {
  * @return Error code
  */
 esp_err_t drv_timer_init() {
-    esp_err_t err = ESP_OK;
-
     timer_config_t config = {
         // Select and initialize basic parameters of the timer
         .divider = TIMER_DIVIDER,  // Clock source is APB. Run the timer at 40 MHz (max available freq.)
@@ -34,7 +32,7 @@ esp_err_t drv_timer_init() {
     };
 
     // Initialise the timer
-    ESP_RETURN_ON_ERROR(timer_init(TIMER_GROUP, TIMER_NUM, &config), TAG, "Failed to initialise the timer";
+    ESP_RETURN_ON_ERROR(timer_init(TIMER_GROUP, TIMER_NUM, &config), TAG, "Failed to initialise the timer");
 
     static const uint64_t initial_count = 0;
     ESP_RETURN_ON_ERROR(timer_set_counter_value(TIMER_GROUP, TIMER_NUM, initial_count), TAG, "Failed to set the initial timer count to 0");
