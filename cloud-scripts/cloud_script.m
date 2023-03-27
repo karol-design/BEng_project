@@ -1,7 +1,7 @@
 % MATLAB script for visualizing data from a single HertzNet device
 
 % Number of packets to display on a single graph
-no_of_packets = 50;
+no_of_packets = 80;
 
 % Channel ID to read data from:
 readChannelID = 2033438;
