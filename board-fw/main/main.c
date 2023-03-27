@@ -59,8 +59,8 @@ void app_main(void) {
     /**** Infinite measure - upload loop ****/
     int64_t n = 0;
     while (true) {
-        if (wifi_drv_fault() == true) {
-            esp_restart();  // Restart the microcontroller
+        if (wifi_drv_fault() == true || mqtt_drv_connected() == false) {
+            esp_restart();  // Reboot the microcontroller
         }
         f_measurement_t meas = f_measurement_get_val();       // Read frequency and timestamp
         payload.d[n % MQTT_MEAS_PER_BURST].f_hz = meas.freq;  // Copy the frequency value to payload
