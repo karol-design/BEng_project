@@ -153,11 +153,12 @@ esp_err_t mqtt_drv_init() {
     client = esp_mqtt_client_init(&mqtt_cfg);  // Initialise MQTT client
 
     if (client != NULL) {  // Check whether the returned MQTT handle is valid
-        ESP_ERROR_CHECK(esp_mqtt_client_register_event(client, ESP_EVENT_ANY_ID, mqtt_event_handler, NULL));
-        ESP_ERROR_CHECK(esp_mqtt_client_start(client));  // Start the MQTT client
+        ESP_RETURN_ON_ERROR(esp_mqtt_client_register_event(client, ESP_EVENT_ANY_ID, mqtt_event_handler, NULL), TAG, "Failed to register MQTT Event handler");
+        ESP_RETURN_ON_ERROR(esp_mqtt_client_start(client), TAG, "Failed to start the MQTT Client");  // Start the MQTT client
         err = ESP_OK;
     } else {
         err = ESP_FAIL;
+        ESP_RETURN_ON_ERROR(err, TAG, "Failed to initialise MTT client (NULL pointer returned)");
     }
 
     mqtt_queue = xQueueCreate(1, sizeof(mqtt_payload_t));          // Create a queue for data to be sent

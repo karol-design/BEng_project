@@ -33,12 +33,11 @@ esp_err_t drv_timer_init() {
         .auto_reload = TIMER_AUTORELOAD_DIS,  // No interrupts
     };
 
-    err = timer_init(TIMER_GROUP, TIMER_NUM, &config);  // Initialise the timer
-    ESP_ERROR_CHECK(err);
+    // Initialise the timer
+    ESP_RETURN_ON_ERROR(timer_init(TIMER_GROUP, TIMER_NUM, &config), TAG, "Failed to initialise the timer";
 
     static const uint64_t initial_count = 0;
-    err = timer_set_counter_value(TIMER_GROUP, TIMER_NUM, initial_count);
-    ESP_ERROR_CHECK(err);
+    ESP_RETURN_ON_ERROR(timer_set_counter_value(TIMER_GROUP, TIMER_NUM, initial_count), TAG, "Failed to set the initial timer count to 0");
 
     ESP_LOGI(TAG, "Timer initialised and running");
     return ESP_OK;

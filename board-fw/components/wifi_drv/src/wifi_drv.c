@@ -8,7 +8,7 @@
 
 #define TAG "wifi_drv"
 
-static uint8_t ip_assigned = false;  // IP assigned by the AP flag
+static uint8_t ip_assigned = false;       // IP assigned by the AP flag
 static uint8_t wifi_fault_event = false;  // WiFi Disconnected or IP lost flag
 
 /**
@@ -29,7 +29,7 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
         ip_assigned = true;
     } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_LOST_IP) {
         ESP_LOGW(TAG, "Lost IP Event");
-        wifi_fault_event = true;   
+        wifi_fault_event = true;
     }
 }
 
@@ -55,7 +55,7 @@ uint8_t wifi_drv_fault() {
  */
 int8_t wifi_drv_get_rssi() {
     wifi_ap_record_t wifi_ap_info;
-    ESP_ERROR_CHECK(esp_wifi_sta_get_ap_info(&wifi_ap_info));
+    ESP_RETURN_ON_ERROR(esp_wifi_sta_get_ap_info(&wifi_ap_info), TAG, "Failed to get AP info (RSSI)");
     return (wifi_ap_info.rssi);
 }
 
@@ -64,16 +64,19 @@ int8_t wifi_drv_get_rssi() {
  * @return Error code
  */
 esp_err_t wifi_drv_init() {
-    ESP_ERROR_CHECK(esp_netif_init());                 // Create an LwIP core task and initialize LwIP-related work
-    ESP_ERROR_CHECK(esp_event_loop_create_default());  // Create an event loop to handle events from the WiFi task
+    // Create an LwIP core task and initialize LwIP-related work
+    ESP_RETURN_ON_ERROR(esp_netif_init(), TAG, "Failed to initialise LwIP (NETIF)");
+    // Create an event loop to handle events from the WiFi task
+    ESP_RETURN_ON_ERROR(esp_event_loop_create_default(), TAG, "Failed to create a default event loop");
 
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();  // Use default configuration parameters
-    ESP_ERROR_CHECK(esp_wifi_init(&cfg));                 // Initialize WiFi, allocate resource, start WiFi task
+    // Initialize WiFi, allocate resource, start WiFi task
+    ESP_RETURN_ON_ERROR(esp_wifi_init(&cfg), TAG, "Failed to initialise WiFi");
     ESP_LOGI(TAG, "WiFi initialised sucessfully");
 
     // Register an event handler for WIFI and IP events
-    ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL, NULL));
-    ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL, NULL));
+    ESP_RETURN_ON_ERROR(esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL, NULL), TAG, "Failed to register an event handler for WiFi");
+    ESP_RETURN_ON_ERROR(esp_event_handler_instance_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL, NULL), TAG, "Failed to register an event handler for IP events");
 
     // Initialize default station as network interface instance (esp-netif)
     esp_netif_t* sta_netif = esp_netif_create_default_wifi_sta();
@@ -91,10 +94,11 @@ esp_err_t wifi_drv_init() {
         },
     };
 
-    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));                // Set mode to station
-    ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));  // Set configuration
+    // Set mode to station and set WiFi configuration
+    ESP_RETURN_ON_ERROR(esp_wifi_set_mode(WIFI_MODE_STA), TAG, "Failed to set the WiFi mode to STA");
+    ESP_RETURN_ON_ERROR(esp_wifi_set_config(WIFI_IF_STA, &wifi_config), TAG, "Failed to set WiFi config");
     ESP_LOGI(TAG, "WiFi configured sucessfully");
-    ESP_ERROR_CHECK(esp_wifi_start());  // Start WiFi
+    ESP_RETURN_ON_ERROR(esp_wifi_start(), TAG, "Failed to start the WiFi");  // Start WiFi
     ESP_LOGI(TAG, "WiFi started sucessfully");
 
     return ESP_OK;

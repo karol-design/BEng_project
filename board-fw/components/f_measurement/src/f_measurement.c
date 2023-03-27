@@ -74,7 +74,8 @@ static esp_err_t intr_gpio_config(uint64_t gpio_input_pin_sel) {
         .intr_type = GPIO_INTR_POSEDGE       // Interrupt of rising edge
     };
 
-    ESP_ERROR_CHECK(gpio_config(&io_conf));  // Configure GPIO with the given settings
+    // Configure GPIO with the given settings
+    ESP_RETURN_ON_ERROR(gpio_config(&io_conf), TAG, "Failed to configure GPIO");
     ESP_LOGI(TAG, "INTR GPIO Configured");
     return ESP_OK;
 }
@@ -85,22 +86,20 @@ static esp_err_t intr_gpio_config(uint64_t gpio_input_pin_sel) {
  * @return Error code
  */
 esp_err_t f_measurement_init(uint64_t gpio_interrupt) {
-    esp_err_t err = ESP_OK;
-    ESP_ERROR_CHECK(drv_timer_init());
+    ESP_RETURN_ON_ERROR(drv_timer_init(), TAG, "Timer driver initialisation failed");
 
     uint64_t gpio_input_pin_select = (1ULL << gpio_interrupt);
-    err = intr_gpio_config(gpio_input_pin_select);  // Initialise gpio for the interrupt
-    ESP_ERROR_CHECK(err);
+    // Initialise gpio for the interrupt
+    ESP_RETURN_ON_ERROR(intr_gpio_config(gpio_input_pin_select), TAG, "Failed to initialise GPIO Interrupt");  
 
     // Create a queue to handle up to one burst of frequency measurements and timestamps from the isr
     isr_count_queue = xQueueCreate(MQTT_MEAS_PER_BURST, sizeof(uint64_t));
     isr_time_queue = xQueueCreate(MQTT_MEAS_PER_BURST, sizeof(uint64_t));
 
-    err = gpio_install_isr_service(ESP_INTR_FLAG_DEFAULT);  // Install gpio isr service
-    ESP_ERROR_CHECK(err);
-
-    err = gpio_isr_handler_add(gpio_interrupt, isr_handler, NULL);  // Hook isr handler for specific gpio pin
-    ESP_ERROR_CHECK(err);
+    // Install gpio isr service
+    ESP_RETURN_ON_ERROR(gpio_install_isr_service(ESP_INTR_FLAG_DEFAULT), TAG, "Failed to install ISR Service");
+    // Hook isr handler for specific gpio pin
+    ESP_RETURN_ON_ERROR(gpio_isr_handler_add(gpio_interrupt, isr_handler, NULL), TAG, "Failed to add ISR Handler");
 
     ESP_LOGI(TAG, "ISR Service installed, handler added, interrupt task created");
     return ESP_OK;

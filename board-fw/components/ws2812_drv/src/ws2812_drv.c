@@ -27,8 +27,10 @@ esp_err_t ws2812_drv_init(void) {
         .tx_config.idle_level = 0,
         .clk_div = 2};
 
-    ESP_ERROR_CHECK(rmt_config(&config));                       // Configure RMT based on the config struct
-    ESP_ERROR_CHECK(rmt_driver_install(config.channel, 0, 0));  // Initialise RMT driver
+    // Configure RMT based on the config struct
+    ESP_RETURN_ON_ERROR(rmt_config(&config), TAG, "Failed to configure RMT peripheral");
+    // Initialise RMT driver
+    ESP_RETURN_ON_ERROR(rmt_driver_install(config.channel, 0, 0), TAG, "Failed to initialise RMT driver");
     ESP_LOGI(TAG, "RMT (WS2812) driver initialised and running");
 
     return ESP_OK;
@@ -59,8 +61,8 @@ static esp_err_t ws2812_drv_update(led_state_t led_state) {
     ws2812_drv_set_rmt_buffer(led_state);  // Populate the RMT buffer according to the new LED state
 
     // Write the bits from the buffer and block until the transmission is finished
-    ESP_ERROR_CHECK(rmt_write_items(WS2812_RMT_CHANNEL, rmt_data_buffer, WS2812_BITS_PER_CMD, false));
-    ESP_ERROR_CHECK(rmt_wait_tx_done(WS2812_RMT_CHANNEL, portMAX_DELAY));
+    ESP_RETURN_ON_ERROR(rmt_write_items(WS2812_RMT_CHANNEL, rmt_data_buffer, WS2812_BITS_PER_CMD, false), TAG, "Failed to write items through RMT");
+    ESP_RETURN_ON_ERROR(rmt_wait_tx_done(WS2812_RMT_CHANNEL, portMAX_DELAY), TAG, "Failed to wait for RMT TX");
 
     return ESP_OK;
 }
@@ -83,7 +85,8 @@ esp_err_t ws2812_drv_set_color(uint32_t r, uint32_t g, uint32_t b, uint32_t brig
     g <<= 8;   // Green intensity is stored in bits 16 to 9
 
     led_state_t led_state = (((r | g) | b) & (0x00FFFFFF));  // Combine r, g and b values into one uint
-    ESP_ERROR_CHECK(ws2812_drv_update(led_state));           // Update the LED
+
+    ESP_RETURN_ON_ERROR(ws2812_drv_update(led_state), TAG, "Failed to update the LED state");  // Update the LED
 
     return ESP_OK;
 }
@@ -96,26 +99,26 @@ esp_err_t ws2812_drv_set_color(uint32_t r, uint32_t g, uint32_t b, uint32_t brig
 esp_err_t ws2812_drv_startup_animation(uint32_t brightness) {
     ESP_LOGI(TAG, "Run startup animation");
     for (uint32_t i = 0; i < 100; i++) {  // Increase blue color intensity
-        ESP_ERROR_CHECK(ws2812_drv_set_color(i, 0, i, brightness));
+        ESP_RETURN_ON_ERROR(ws2812_drv_set_color(i, 0, i, brightness), TAG, "Failed to set WS2812 color");
         vTaskDelay(10 / portTICK_PERIOD_MS);
     }
 
     for (uint32_t i = 0; i < 75; i++) {  // Keep increasing blue intens. and start increasing green intens.
-        ESP_ERROR_CHECK(ws2812_drv_set_color(100, i, 100 + i, brightness));
-        vTaskDelay(15 / portTICK_PERIOD_MS);
+        ESP_RETURN_ON_ERROR(ws2812_drv_set_color(100, i, 100 + i, brightness), TAG, "Failed to set WS2812 color");
+        vTaskDelay(20 / portTICK_PERIOD_MS);
     }
 
     for (uint32_t i = 0; i < 70; i++) {  // Mix all three colors slowly increasing their intensity
-        ESP_ERROR_CHECK(ws2812_drv_set_color(100 + (i * 2), 75 + (i * 2), 175 + i, brightness));
+        ESP_RETURN_ON_ERROR(ws2812_drv_set_color(100 + (i * 2), 75 + (i * 2), 175 + i, brightness), TAG, "Failed to set WS2812 color");
         vTaskDelay(20 / portTICK_PERIOD_MS);
     }
 
     for (uint32_t i = brightness; i > 0; i--) {  // Mix all three colors slowly increasing their intensity
-        ESP_ERROR_CHECK(ws2812_drv_set_color(240, 215, 245, i));
+        ESP_RETURN_ON_ERROR(ws2812_drv_set_color(240, 215, 245, i), TAG, "Failed to set WS2812 color");
         vTaskDelay(10 / portTICK_PERIOD_MS);
     }
-    
-    vTaskDelay(100 / portTICK_PERIOD_MS);
+
+    vTaskDelay(20 / portTICK_PERIOD_MS);
 
     return ESP_OK;
 }
