@@ -44,7 +44,6 @@ static void IRAM_ATTR isr_handler(void *arg) {
  */
 static void f_measurement_task(void *param) {
     while (true) {
-        static uint64_t time_ms = 0;  // Time of measurement in ms
         struct timeval time;          // Struct to hold current system time
         uint64_t count;
         f_measurement_t meas = {.freq = -1.0, .time = 0};  // Initialise measurement struct as invalid
