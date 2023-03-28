@@ -3,7 +3,7 @@ BEng 3rd Year Individual Project | University of Manchester
 
 ### CI Workflow results
 
-![ESP-IDF CI Build](https://github.com/karol-design/HertzNet/actions/workflows/esp32_build.yml/badge.svg) [![Generic badge](https://img.shields.io/badge/Thingspeak_Dashboard_-running-green.svg)](https://thingspeak.com/channels/2033438)
+![ESP-IDF CI Build](https://github.com/karol-design/HertzNet/actions/workflows/esp32_build.yml/badge.svg) [![MATLAB](https://github.com/karol-design/HertzNet/actions/workflows/matlab.yml/badge.svg)](https://github.com/karol-design/HertzNet/actions/workflows/matlab.yml) [![Generic badge](https://img.shields.io/badge/Thingspeak_Dashboard_-running-green.svg)](https://thingspeak.com/channels/2033438)
 
 
 ## About 
