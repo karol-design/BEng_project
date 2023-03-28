@@ -1,0 +1,26 @@
+name: MATLAB Build
+
+# Controls when the action will run. 
+on:
+  # Triggers the workflow on push or pull request events
+  push:
+  workflow_dispatch:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+      
+      # Sets up MATLAB on the GitHub Actions runner
+      - name: Setup MATLAB
+        uses: matlab-actions/setup-matlab@v1
+
+      # Runs a set of commands using the runners shell
+      - name: Run all tests
+        uses: matlab-actions/run-tests@v1
+        with:
+          source-folder: cloud-scipts
