@@ -158,7 +158,7 @@ esp_err_t mqtt_drv_init() {
         err = ESP_OK;
     } else {
         err = ESP_FAIL;
-        ESP_RETURN_ON_ERROR(err, TAG, "Failed to initialise MTT client (NULL pointer returned)");
+        ESP_RETURN_ON_ERROR(err, TAG, "Failed to initialise MQTT client (NULL pointer returned)");
     }
 
     mqtt_queue = xQueueCreate(1, sizeof(mqtt_payload_t));          // Create a queue for data to be sent
