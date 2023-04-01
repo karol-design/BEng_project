@@ -9,13 +9,15 @@ build
 # Back-up files
 sdkconfig.old
 
+# TODO and NOTES
 TODO.md
 NOTES.md
 
 # Other files and folders
-Organisation
+organisation
+system tests
+
 Outdated
 Prototyping
 System tests
 documentation
-System tests
