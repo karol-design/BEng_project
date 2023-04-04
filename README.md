@@ -1,3 +1,4 @@
+![HertzNet Logo](https://i.ibb.co/nDjV8Mm/Hertz-Net-Logo-blue-white.png)
 ## HertzNet | High-accuracy Wireless Mains Frequency Measurement System
 BEng 3rd Year Individual Project | University of Manchester
 
