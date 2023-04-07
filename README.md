@@ -25,6 +25,6 @@ Commit to the main only the code that compile without any warnings or errors.
 To test, compile or flash the code use ESP-IDF 4.4
 
 ### HertzNet Proto 3.0
-![3D Model for Proto 3.0 ](https://i.ibb.co/s2QZTqT/f4-3-D-Model.png)
+![3D Model for Proto 3.0 ](https://i.ibb.co/FwyjFkm/f1-Main-Photo.png)
 
 <center>Figure 1. - 3D Model for Proto 3.0</center>
