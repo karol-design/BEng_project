@@ -114,7 +114,7 @@ static void mqtt_drv_send(mqtt_payload_t data, const char *str_status) {
     strcat(message, "&status=");
     strcat(message, str_status);
 
-    int msg_id = esp_mqtt_client_publish(client, MQTT_TOPIC, message, 0, 0, 0);
+    esp_mqtt_client_publish(client, MQTT_TOPIC, message, 0, 0, 0);
 }
 
 /**
