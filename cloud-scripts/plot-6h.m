@@ -53,40 +53,8 @@ end
 
 
 % -------------------- Data analysis -------------------- %
-
-mov_avg_step = no_of_packets;
-plot_freq_moving_avg = movmean(plot_freq, mov_avg_step);
-freq_mean = mean(plot_freq);
-N = no_of_packets*no_datapoints;
-plot_freq_mean = zeros(N,1) + freq_mean;
-
-    
-% -------------------- Data visualisation -------------------- %
-freq_min = min(plot_freq) - 0.04; % Calculate min and max values and add 30 mHz spacings
-freq_max = max(plot_freq) + 0.04;
-plot_time.TimeZone = timezone; % Set timezone in which the device operates
-
-figure; % Begin graph figure definition
-step = at_least_one(uint64(no_of_packets/100)); % Convert to uint and test if (step > 1) and use 1 otherwise
-p1 = plot(plot_time(1:step:end), plot_freq(1:step:end)); % Plot every ~10th datapoint to provide clearer view
-p1.Color = '#22a7f0';
-hold on;
-
-step = at_least_one(uint64(mov_avg_step/4)); % Convert to uint and test if (step > 1) and use 1 otherwise
-p2 = plot(plot_time(1:step:end), plot_freq_moving_avg(1:step:end), '--', 'LineWidth', 1); % Plot moving average
-p2.Color = '#c23728';
-hold on;
-
-p3 = plot(plot_time, plot_freq_mean, ':', 'LineWidth', 1.5); % Plot mean value 
-p3.Color = '#e1a692';
-
-ylim([freq_min freq_max]);
-xlim([min(plot_time) max(plot_time)]);
-ylabel('Frequency [Hz]');
-xlabel('Time');
-hold off;
-
-legend('Frequency', 'Running average', 'Mean frequency'); % Add graph legend
+step = at_least_one(uint64(1))
+data = [plot_time(1:step:end), plot_freq(1:step:end)]
 
 
 % -------------------- Function definitions -------------------- %

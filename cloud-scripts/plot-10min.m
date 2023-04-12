@@ -2,7 +2,7 @@
 % Author: Karol Wojslaw (karol.wojslaw@student.manchester.ac.uk)
 
 % Thingspeak, MQTT and system config
-no_of_packets = 120;       % Number of packets to unpack and process
+no_of_packets = 720;       % Number of packets to unpack and process
 readChannelID = 2033438;   % Channel ID to read the data from
 timezone = 'Europe/Warsaw'; % Only for display (timestamps stored as GMT)
 
