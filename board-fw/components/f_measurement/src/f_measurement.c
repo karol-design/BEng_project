@@ -57,7 +57,7 @@ static void f_measurement_task(void *param) {
             meas.freq = (meas.freq > 51.0) ? 51.0 : meas.freq;  // Set the upper limit to 51 Hz
             meas.freq = (meas.freq < 49.0) ? 49.0 : meas.freq;  // Set the lowee limit to 49 Hz
 
-            xQueueSend(f_measurement_queue, &meas, NULL);
+            xQueueSend(f_measurement_queue, &meas, (TickType_t)0);
         }
 
         vTaskSuspend(NULL);  // Suspend itself
@@ -72,7 +72,7 @@ f_measurement_t f_measurement_get_val() {
     f_measurement_t meas = {.freq = -1.0, .time = 0};  // Initialise measurement struct as invalid
 
     if (xQueueReceive(f_measurement_queue, &meas, portMAX_DELAY) == pdTRUE) {
-        ESP_LOGD(TAG, "New measurement: %.3lf Hz | %llu ms", meas.freq, meas.time);
+        ESP_LOGI(TAG, "New measurement: %.3lf Hz | %llu ms", meas.freq, meas.time);
     }
 
     return meas;
