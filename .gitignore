@@ -13,10 +13,14 @@ sdkconfig.old
 TODO.md
 NOTES.md
 
+# Google Drive
+.tmp.driveupload
+
 # Other files and folders
 organisation
 system tests
 
+History
 Outdated
 Prototyping
 System tests
