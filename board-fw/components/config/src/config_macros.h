@@ -29,8 +29,8 @@
 #define WS2812_T1L 24           // Bit 1, high time
 
 /* WiFi */
-#define WIFI_SSID "Internet-Enigma_EXT"
-#define WIFI_PASS "telewizor"
+#define WIFI_SSID "TP_LINK_7522"
+#define WIFI_PASS "TwojaStara7522"
 
 /* Timer */
 #define TIMER_DIVIDER (2)  //  Hardware timer clock divider (80/2 = 40 MHz)
